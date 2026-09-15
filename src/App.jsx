@@ -7,7 +7,7 @@ import InventoryTable from './components/InventoryTable';
 import TransactionHistory from './components/TransactionHistory';
 import AddItemModal from './components/AddItemModal';
 import NotificationToast from './components/NotificationToast';
-import { Sparkles, Terminal, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 function DashboardContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -15,7 +15,6 @@ function DashboardContent() {
 
   const handleSelectLowStockFilter = () => {
     setFilterLowStockOnly(true);
-    // Scroll down to inventory table
     const tableEl = document.getElementById('inventory-section');
     if (tableEl) {
       tableEl.scrollIntoView({ behavior: 'smooth' });
@@ -23,25 +22,25 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
-      {/* Top Header */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased">
+      {/* Merchant Header */}
       <Header />
 
-      {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      {/* Main Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
         
         {/* Metric Summary Cards */}
         <SummaryCards onSelectLowStockFilter={handleSelectLowStockFilter} />
 
-        {/* Primary Action Row: Voice Logger */}
-        <section aria-label="Voice Input Logger">
+        {/* Tactile Voice Logger Panel */}
+        <section aria-label="Voice Ingestion Console">
           <VoiceLogger />
         </section>
 
-        {/* Core Tables Grid: Inventory Table (Left/Top) & Recent Transactions (Right/Bottom) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Inventory Table (7 columns on desktop) */}
-          <div id="inventory-section" className="lg:col-span-7 space-y-4">
+        {/* Data Tables Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Inventory Table */}
+          <div id="inventory-section" className="lg:col-span-7">
             <InventoryTable
               onOpenAddModal={() => setIsAddModalOpen(true)}
               filterLowStockOnly={filterLowStockOnly}
@@ -49,28 +48,28 @@ function DashboardContent() {
             />
           </div>
 
-          {/* Recent Activity Log (5 columns on desktop) */}
-          <div className="lg:col-span-5 space-y-4">
+          {/* Audit Ledger */}
+          <div className="lg:col-span-5">
             <TransactionHistory />
           </div>
         </div>
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* Grounded Footer */}
+      <footer className="border-t border-slate-800/80 bg-slate-900/60 py-4 text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Voxide Audio Stream Architecture • Built for Ethiopian Retail & Distribution SMEs</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+            <span>BirrVoice Ledger • SME Merchant Point-of-Sale & Stock System</span>
           </div>
           <div className="font-mono text-[11px] text-slate-400">
-            ETB Currency Engine • Audio Sample Rate 16kHz PCM
+            Audio Sample: 16kHz PCM • Currency: ETB
           </div>
         </div>
       </footer>
 
-      {/* Modals & Overlays */}
+      {/* Overlays */}
       <AddItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
