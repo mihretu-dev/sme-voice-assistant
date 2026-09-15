@@ -1,8 +1,14 @@
-# Voxide SME Voice Assistant | የኢትዮጵያ ንግድ ድምፅ ረዳት
+# BirrVoice Ledger | Voxide SME Voice Assistant | የኢትዮጵያ ንግድ ድምፅ ረዳት
 
 A modern, high-performance web application tailored for Ethiopian Small and Medium Enterprises (SMEs) to record daily sales, manage inventory, and track expenses via voice streams and audio input.
 
 Built with **React 18**, **Vite**, **Tailwind CSS**, and **Lucide React**.
+
+---
+
+## 📄 Ideation & Research (STARK Hackathon Rule 01)
+- **Scholarxiv Ideation Paper**: [BirrVoice Ledger on Scholarxiv](https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92)
+- **Authors**: Mihretu Hizkel & Hamerenoh Demelash (Team Pixel & Code)
 
 ---
 
