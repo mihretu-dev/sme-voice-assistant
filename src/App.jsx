@@ -7,6 +7,7 @@ import InventoryTable from './components/InventoryTable';
 import TransactionHistory from './components/TransactionHistory';
 import AddItemModal from './components/AddItemModal';
 import NotificationToast from './components/NotificationToast';
+import { VoxideBridge } from './components/VoxideBridge';
 import { ShieldCheck } from 'lucide-react';
 
 function DashboardContent() {
@@ -75,6 +76,7 @@ function DashboardContent() {
         onClose={() => setIsAddModalOpen(false)}
       />
       <NotificationToast />
+      <VoxideBridge />
     </div>
   );
 }
