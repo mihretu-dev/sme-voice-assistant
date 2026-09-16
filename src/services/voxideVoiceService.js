@@ -1,3 +1,4 @@
+import { VoxideClient } from "@voxide/react"; export const ai = new VoxideClient({ publicKey: "vox_pub_c209bcadd55e0a156d399be1e724f55eed15c2f4d42de2de", });
 /**
  * Voxide Voice Integration & Mock Service
  *
