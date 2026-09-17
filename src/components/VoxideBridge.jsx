@@ -1,20 +1,23 @@
 import { useEffect } from "react";
-import { VoxideWidget } from "@voxide/react";
-import { ai, VOXIDE_PUBLISHABLE_KEY } from "../services/voxideVoiceService";
+import { ai } from "../services/voxideVoiceService";
 import { useBusiness } from "../context/BusinessContext";
 
+/**
+ * Headless Voxide Bridge
+ * Registers schema tools and binds real-time state with VoxideClient.
+ * Returns null to eliminate the floating pill widget in favor of the unified central mic button.
+ */
 export function VoxideBridge() {
   const { processVoicePayload, inventory, language } = useBusiness();
-  const apiKey =
-    import.meta.env.VITE_VOXIDE_API_KEY ||
-    "vox_pub_f7a7fd61bf7a6e43e1dcdfdd019a1607e1d3fb2e67d5ff5b";
 
   useEffect(() => {
+    // Bind real-time inventory catalog and language context to Voxide
     ai.bindState(() => ({
       commodities: inventory.map((i) => ({ name: i.name, nameAm: i.nameAm })),
       language,
     }));
 
+    // Register capability handlers for Voxide tool calling
     ai.register({
       logSale: {
         description: "Log a sale of a commodity by quantity and total amount in Birr.",
@@ -25,7 +28,7 @@ export function VoxideBridge() {
           language: { type: "string" },
         },
         handler: async ({ item, quantity, amount = 0, language: lang = "en" }) => {
-          console.log("VOXIDE CALLED logSale:", { item, quantity, amount, lang });
+          console.log("[Voxide Live] logSale called:", { item, quantity, amount, lang });
           return processVoicePayload({ action: "sale", item, quantity, amount, language: lang });
         },
       },
@@ -37,7 +40,7 @@ export function VoxideBridge() {
           language: { type: "string" },
         },
         handler: async ({ item, amount, language: lang = "en" }) => {
-          console.log("VOXIDE CALLED logExpense:", { item, amount, lang });
+          console.log("[Voxide Live] logExpense called:", { item, amount, lang });
           return processVoicePayload({ action: "expense", item, quantity: 1, amount, language: lang });
         },
       },
@@ -49,12 +52,13 @@ export function VoxideBridge() {
           language: { type: "string" },
         },
         handler: async ({ item, quantity, language: lang = "en" }) => {
-          console.log("VOXIDE CALLED restockItem:", { item, quantity, lang });
+          console.log("[Voxide Live] restockItem called:", { item, quantity, lang });
           return processVoicePayload({ action: "stock", item, quantity, amount: 0, language: lang });
         },
       },
     });
   }, [inventory, language, processVoicePayload]);
 
-  return <VoxideWidget client={ai} apiKey={apiKey} publicKey={apiKey} />;
+  // Headless integration: unified mic in VoiceLogger.jsx controls recording
+  return null;
 }
