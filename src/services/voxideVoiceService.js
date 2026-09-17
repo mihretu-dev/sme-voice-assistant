@@ -1,4 +1,12 @@
-import { VoxideClient } from "@voxide/react"; export const ai = new VoxideClient({ publicKey: "vox_pub_c209bcadd55e0a156d399be1e724f55eed15c2f4d42de2de", });
+import { VoxideClient } from "@voxide/react";
+
+export const VOXIDE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_VOXIDE_API_KEY ||
+  "vox_pub_f7a7fd61bf7a6e43e1dcdfdd019a1607e1d3fb2e67d5ff5b";
+
+export const ai = new VoxideClient({
+  publicKey: VOXIDE_PUBLISHABLE_KEY,
+});
 /**
  * Voxide Voice Integration & Mock Service
  *

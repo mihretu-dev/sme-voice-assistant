@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { VoxideWidget } from "@voxide/react";
-import { ai } from "../services/voxideVoiceService";
+import { ai, VOXIDE_PUBLISHABLE_KEY } from "../services/voxideVoiceService";
 import { useBusiness } from "../context/BusinessContext";
 
 export function VoxideBridge() {
   const { processVoicePayload, inventory, language } = useBusiness();
+  const apiKey =
+    import.meta.env.VITE_VOXIDE_API_KEY ||
+    "vox_pub_f7a7fd61bf7a6e43e1dcdfdd019a1607e1d3fb2e67d5ff5b";
 
   useEffect(() => {
     ai.bindState(() => ({
@@ -53,5 +56,5 @@ export function VoxideBridge() {
     });
   }, [inventory, language, processVoicePayload]);
 
-  return <VoxideWidget client={ai} />;
+  return <VoxideWidget client={ai} apiKey={apiKey} publicKey={apiKey} />;
 }
