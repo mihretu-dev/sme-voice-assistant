@@ -7,6 +7,19 @@ export const VOXIDE_PUBLISHABLE_KEY =
 export const ai = new VoxideClient({
   publicKey: VOXIDE_PUBLISHABLE_KEY,
 });
+
+let initPromise = null;
+
+export async function ensureInitialized() {
+  if (ai.isInitialized) return ai;
+  if (!initPromise) {
+    initPromise = ai.init().catch((err) => {
+      initPromise = null;
+      throw err;
+    });
+  }
+  return initPromise;
+}
 /**
  * Voxide Voice Integration & Mock Service
  *

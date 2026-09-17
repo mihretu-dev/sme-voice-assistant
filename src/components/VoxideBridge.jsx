@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ai } from "../services/voxideVoiceService";
+import { ai, ensureInitialized } from "../services/voxideVoiceService";
 import { useBusiness } from "../context/BusinessContext";
 
 /**
@@ -11,6 +11,11 @@ export function VoxideBridge() {
   const { processVoicePayload, inventory, language } = useBusiness();
 
   useEffect(() => {
+    // Proactively initialize Voxide client
+    ensureInitialized().catch((err) => {
+      console.warn("[Voxide] Background initialization notice:", err);
+    });
+
     // Bind real-time inventory catalog and language context to Voxide
     ai.bindState(() => ({
       commodities: inventory.map((i) => ({ name: i.name, nameAm: i.nameAm })),

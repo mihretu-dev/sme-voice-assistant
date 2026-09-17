@@ -11,6 +11,7 @@ import {
 import { useBusiness } from '../context/BusinessContext';
 import {
   ai,
+  ensureInitialized,
   VOXIDE_PRESETS,
   simulateVoxideAudioSession,
   parseVoiceInputText,
@@ -94,27 +95,22 @@ export default function VoiceLogger() {
       return;
     }
 
-    // If live Voxide is currently active, disconnect
-    if (
+    const isListening =
       voxide.status === 'listening' ||
       voxide.status === 'connecting' ||
       voxide.status === 'thinking' ||
       voxide.status === 'speaking' ||
-      voxide.status === 'executing'
-    ) {
-      try {
-        voxide.disconnect();
-      } catch (err) {
-        console.warn('Voxide disconnect error:', err);
-      }
-      return;
-    }
+      voxide.status === 'executing';
 
-    // Start live Voxide session
     try {
-      await voxide.connect();
+      await ensureInitialized();
+      if (isListening) {
+        await voxide.disconnect();
+      } else {
+        await voxide.connect();
+      }
     } catch (err) {
-      console.error('Voxide connect error:', err);
+      console.error('Voxide activation error:', err);
       showToast(
         isAmharic
           ? 'የቀጥታ ድምፅ ግንኙነት አልተሳካም፤ የፈተና ናሙናውን በመጠቀም ላይ...'
