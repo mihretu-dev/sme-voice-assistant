@@ -1,4 +1,25 @@
-import { VoxideClient } from "@voxide/react"; export const ai = new VoxideClient({ publicKey: "vox_pub_c209bcadd55e0a156d399be1e724f55eed15c2f4d42de2de", });
+import { VoxideClient } from "@voxide/react";
+
+export const VOXIDE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_VOXIDE_API_KEY ||
+  "vox_pub_f7a7fd61bf7a6e43e1dcdfdd019a1607e1d3fb2e67d5ff5b";
+
+export const ai = new VoxideClient({
+  publicKey: VOXIDE_PUBLISHABLE_KEY,
+});
+
+let initPromise = null;
+
+export async function ensureInitialized() {
+  if (ai.isInitialized) return ai;
+  if (!initPromise) {
+    initPromise = ai.init().catch((err) => {
+      initPromise = null;
+      throw err;
+    });
+  }
+  return initPromise;
+}
 /**
  * Voxide Voice Integration & Mock Service
  *

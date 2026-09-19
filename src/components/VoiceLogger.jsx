@@ -11,22 +11,30 @@ import {
 } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 import {
+  ai,
+  ensureInitialized,
   VOXIDE_PRESETS,
   simulateVoxideAudioSession,
   parseVoiceInputText,
 } from '../services/voxideVoiceService';
+import { useVoxideVoice } from '@voxide/react';
 
 export default function VoiceLogger() {
-  const { language, processVoicePayload, lastVoiceEvent } = useBusiness();
+  const { language, processVoicePayload, lastVoiceEvent, showToast } = useBusiness();
   const isAmharic = language === 'am';
 
-  const [sessionState, setSessionState] = useState('idle');
-  const [streamInfo, setStreamInfo] = useState({
-    message: isAmharic ? 'ድምፅ ለመመዝገብ ቁልፉን ይጫኑ' : 'Say a sale, expense or restock',
-    transcript: '',
-  });
+  // Real-time Voxide SDK integration
+  const voxide = useVoxideVoice(ai);
 
+  // Local simulation states
+  const [simState, setSimState] = useState('idle'); // 'idle' | 'listening' | 'processing'
+  const [simTranscript, setSimTranscript] = useState('');
+  const [recentSuccess, setRecentSuccess] = useState(false);
+
+  // Collapsible testing tools panel
   const [showTools, setShowTools] = useState(false);
+
+  // Fallback inputs
   const [customText, setCustomText] = useState('');
   const [showJsonEditor, setShowJsonEditor] = useState(false);
   const [jsonInput, setJsonInput] = useState(
@@ -45,50 +53,93 @@ export default function VoiceLogger() {
     };
   }, []);
 
-  const handleMicClick = () => {
-    if (sessionState === 'listening' || sessionState === 'processing') {
-      if (cleanupSessionRef.current) cleanupSessionRef.current();
-      setSessionState('idle');
-      setStreamInfo({
-        message: isAmharic ? 'ምዝገባው ተቋርጧል' : 'Recording stopped.',
-        transcript: '',
-      });
+  // Flash green success state for 2.5s whenever a voice event completes
+  useEffect(() => {
+    if (lastVoiceEvent) {
+      setRecentSuccess(true);
+      const timer = setTimeout(() => setRecentSuccess(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [lastVoiceEvent]);
+
+  // Derive unified effective state: 'idle' | 'listening' | 'processing' | 'success'
+  let effectiveState = 'idle';
+  if (recentSuccess) {
+    effectiveState = 'success';
+  } else if (simState !== 'idle') {
+    effectiveState = simState;
+  } else if (voxide.status === 'listening' || voxide.status === 'speaking') {
+    effectiveState = 'listening';
+  } else if (
+    voxide.status === 'connecting' ||
+    voxide.status === 'thinking' ||
+    voxide.status === 'executing'
+  ) {
+    effectiveState = 'processing';
+  } else {
+    effectiveState = 'idle';
+  }
+
+  const isBusy = effectiveState === 'listening' || effectiveState === 'processing';
+
+  // Unified Mic Trigger: wires directly to Voxide live voice or stops active session
+  const handleMicClick = async () => {
+    if (cleanupSessionRef.current) {
+      cleanupSessionRef.current();
+      cleanupSessionRef.current = null;
+    }
+    if (simState !== 'idle') {
+      setSimState('idle');
+      setSimTranscript('');
       return;
     }
 
-    const langPresets = VOXIDE_PRESETS.filter((p) => p.language === language);
-    const chosenPreset = langPresets[Math.floor(Math.random() * langPresets.length)] || VOXIDE_PRESETS[0];
-    runVoiceSimulation(chosenPreset);
+    const isListening =
+      voxide.status === 'listening' ||
+      voxide.status === 'connecting' ||
+      voxide.status === 'thinking' ||
+      voxide.status === 'speaking' ||
+      voxide.status === 'executing';
+
+    try {
+      await ensureInitialized();
+      if (isListening) {
+        await voxide.disconnect();
+      } else {
+        await voxide.connect();
+      }
+    } catch (err) {
+      console.error('Voxide activation error:', err);
+      showToast(
+        isAmharic
+          ? 'የቀጥታ ድምፅ ግንኙነት አልተሳካም፤ የፈተና ናሙናውን በመጠቀም ላይ...'
+          : 'Live audio stream unavailable. Falling back to test simulation.',
+        'warning'
+      );
+      const langPresets = VOXIDE_PRESETS.filter((p) => p.language === language);
+      const fallbackPreset = langPresets[0] || VOXIDE_PRESETS[0];
+      runVoiceSimulation(fallbackPreset);
+    }
   };
 
+  // Safe simulation runner for judge demo & testing without token drain
   const runVoiceSimulation = (preset) => {
     if (cleanupSessionRef.current) cleanupSessionRef.current();
 
-    setSessionState('listening');
-    setStreamInfo({
-      message: isAmharic ? 'ድምፅ በማዳመጥ ላይ...' : 'Listening to speech stream...',
-      transcript: '',
-    });
+    setSimState('listening');
+    setSimTranscript('');
 
     cleanupSessionRef.current = simulateVoxideAudioSession(
       preset,
       (statusUpdate) => {
-        setSessionState(statusUpdate.status);
-        setStreamInfo((prev) => ({
-          ...prev,
-          message: statusUpdate.message,
-          transcript: statusUpdate.transcript || prev.transcript,
-        }));
+        if (statusUpdate.status === 'listening') setSimState('listening');
+        if (statusUpdate.status === 'processing') setSimState('processing');
+        if (statusUpdate.transcript) setSimTranscript(statusUpdate.transcript);
       },
       (payload) => {
         processVoicePayload(payload);
-        setTimeout(() => {
-          setSessionState('idle');
-          setStreamInfo({
-            message: isAmharic ? 'ግብይቱ በተሳካ ሁኔታ ተመዝግቧል' : 'Say a sale, expense or restock',
-            transcript: '',
-          });
-        }, 2500);
+        setSimState('idle');
+        setSimTranscript('');
       }
     );
   };
@@ -111,7 +162,22 @@ export default function VoiceLogger() {
     }
   };
 
-  const isBusy = sessionState === 'listening' || sessionState === 'processing';
+  const statusMessage =
+    effectiveState === 'listening'
+      ? isAmharic
+        ? 'ድምፅ በማዳመጥ ላይ (አማርኛ / እንግሊዝኛ)... ለማቆም ይጫኑ'
+        : 'Listening (Amharic / English)... Click to finish'
+      : effectiveState === 'processing'
+      ? isAmharic
+        ? 'በ Voxide ድምፅ ትርጉም እየተከናወነ ነው...'
+        : 'Transcribing via Voxide...'
+      : effectiveState === 'success'
+      ? isAmharic
+        ? 'የድምፅ ግብይት በተሳካ ሁኔታ ተመዝግቧል!'
+        : 'Structured transaction recorded successfully!'
+      : isAmharic
+      ? 'ድምፅ ለመመዝገብ ማይክሮፎኑን ይጫኑ'
+      : 'Say a sale, expense or restock';
 
   return (
     <div className="rounded-xl bg-slate-900 border border-slate-800/90 p-6 sm:p-8">
@@ -131,19 +197,26 @@ export default function VoiceLogger() {
           id="voxide-mic-button"
           onClick={handleMicClick}
           className={`flex items-center justify-center w-14 h-14 rounded-full transition-all duration-150 active:scale-95 ${
-            sessionState === 'listening'
-              ? 'bg-red-600 text-white'
-              : sessionState === 'processing'
+            effectiveState === 'listening'
+              ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 scale-105'
+              : effectiveState === 'processing'
               ? 'bg-slate-800 text-indigo-400'
-              : sessionState === 'success'
-              ? 'bg-emerald-600 text-white'
+              : effectiveState === 'success'
+              ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/40'
               : 'bg-indigo-600 hover:bg-indigo-500 text-white'
           }`}
-          title={sessionState === 'listening' ? 'Click to stop recording' : 'Click to start recording'}
+          title={effectiveState === 'listening' ? 'Click to finish recording' : 'Click to start voice input'}
         >
-          {sessionState === 'processing' ? (
+          {effectiveState === 'listening' ? (
+            <div className="flex items-center gap-1">
+              <span className="w-1 bg-white rounded-full animate-audio-bar-1" />
+              <span className="w-1 bg-white rounded-full animate-audio-bar-2" />
+              <span className="w-1 bg-white rounded-full animate-audio-bar-3" />
+              <span className="w-1 bg-white rounded-full animate-audio-bar-4" />
+            </div>
+          ) : effectiveState === 'processing' ? (
             <Loader2 className="w-6 h-6 animate-spin" />
-          ) : sessionState === 'success' ? (
+          ) : effectiveState === 'success' ? (
             <CheckCircle2 className="w-6 h-6" />
           ) : (
             <Mic className="w-6 h-6" />
@@ -151,10 +224,10 @@ export default function VoiceLogger() {
         </button>
 
         <div className="mt-3">
-          <div className="text-xs text-slate-400">{streamInfo.message}</div>
-          {streamInfo.transcript && (
+          <div className="text-xs text-slate-400">{statusMessage}</div>
+          {simTranscript && (
             <div className="mt-1.5 text-xs text-slate-300 font-mono bg-slate-950 px-3 py-1 rounded border border-slate-800 inline-block">
-              "{streamInfo.transcript}"
+              "{simTranscript}"
             </div>
           )}
         </div>
@@ -176,6 +249,13 @@ export default function VoiceLogger() {
 
         {showTools && (
           <div className="mt-3.5">
+            <div className="mb-3.5 p-3 rounded-lg bg-amber-950/30 border border-amber-800/40 flex items-start gap-2.5">
+              <span className="text-amber-400 font-bold text-xs shrink-0 mt-0.5">⚡</span>
+              <div className="text-xs text-amber-200/90 leading-relaxed">
+                <strong className="font-semibold text-amber-300">Judge Testing Note:</strong> Click the mic above to test live voice input, or click any preset chip below to test instant parsing without exhausting live session credits.
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {VOXIDE_PRESETS.map((preset) => {
                 const isSale = preset.payload.action === 'sale';
