@@ -1,11 +1,46 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, Wallet, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { TrendingUp, TrendingDown, Wallet, AlertCircle } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 import { formatETB } from '../utils/formatters';
 
+function useHourlySparkline(transactions, type, hours = 8) {
+  return useMemo(() => {
+    const now = Date.now();
+    const bucketMs = 60 * 60 * 1000;
+    const buckets = new Array(hours).fill(0);
+    transactions.forEach((tx) => {
+      if (tx.type !== type) return;
+      const age = now - tx.timestamp;
+      if (age < 0 || age > hours * bucketMs) return;
+      const idx = hours - 1 - Math.floor(age / bucketMs);
+      if (idx >= 0 && idx < hours) buckets[idx] += Number(tx.amount) || 0;
+    });
+    const max = Math.max(...buckets, 1);
+    const points = buckets
+      .map((v, i) => {
+        const x = (i / (hours - 1)) * 100;
+        const y = 22 - (v / max) * 18;
+        return `${x},${y}`;
+      })
+      .join(' ');
+    return points;
+  }, [transactions, type, hours]);
+}
+
+function Sparkline({ points, colorClass }) {
+  return (
+    <svg width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none" className="mt-2">
+      <polyline points={points} fill="none" strokeWidth="1.5" className={colorClass} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
 export default function SummaryCards({ onSelectLowStockFilter }) {
-  const { summary, language } = useBusiness();
+  const { summary, language, transactions } = useBusiness();
   const isAmharic = language === 'am';
+
+  const salesPoints = useHourlySparkline(transactions, 'sale');
+  const expensePoints = useHourlySparkline(transactions, 'expense');
 
   const cards = [
     {
@@ -17,6 +52,8 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
       iconColor: 'text-emerald-400',
       badgeText: isAmharic ? 'ገቢ' : 'Inflow',
       badgeStyle: 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40',
+      sparkline: salesPoints,
+      sparklineColor: 'stroke-emerald-400',
     },
     {
       id: 'expenses',
@@ -27,6 +64,8 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
       iconColor: 'text-rose-400',
       badgeText: isAmharic ? 'ወጪ' : 'Outflow',
       badgeStyle: 'text-rose-400 bg-rose-950/40 border-rose-800/40',
+      sparkline: expensePoints,
+      sparklineColor: 'stroke-slate-400',
     },
     {
       id: 'net-cash',
@@ -41,7 +80,7 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
     {
       id: 'low-stock',
       title: isAmharic ? 'ዝቅተኛ ክምችት ማስጠንቀቂያ' : 'Low Stock Items',
-      subtitle: summary.lowStockCount > 0 
+      subtitle: summary.lowStockCount > 0
         ? (isAmharic ? `${summary.lowStockCount} ዕቃዎች ከደረጃ በታች ናቸው` : `${summary.lowStockCount} item(s) below reorder level`)
         : (isAmharic ? 'ሁሉም ዕቃዎች በጥሩ መጠን አሉ' : 'All items at healthy stock'),
       amount: `${summary.lowStockCount} ${isAmharic ? 'ዕቃዎች' : 'Items'}`,
@@ -75,6 +114,8 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
             <div className="text-2xl font-bold tracking-tight text-slate-100 tabular-nums">
               {card.amount}
             </div>
+
+            {card.sparkline && <Sparkline points={card.sparkline} colorClass={card.sparklineColor} />}
 
             <div className="mt-3 flex items-center justify-between text-xs text-slate-400 pt-2.5 border-t border-slate-800/60">
               <span className="truncate text-[11px] text-slate-400">{card.subtitle}</span>
