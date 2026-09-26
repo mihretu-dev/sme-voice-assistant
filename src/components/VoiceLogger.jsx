@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Mic,
   Send,
@@ -18,11 +18,17 @@ import {
   parseVoiceInputText,
 } from '../services/voxideVoiceService';
 import { useVoxideVoice } from '@voxide/react';
+import MicPermissionModal from './MicPermissionModal';
+
+// Haptic feedback helper (mobile vibration API)
+function haptic(pattern = [30]) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
 
 // Heights (px) for the idle static visualizer bars
 const BAR_HEIGHTS = [10, 22, 14, 26, 8, 18, 12];
 
-export default function VoiceLogger() {
+export default function VoiceLogger({ compact = false }) {
   const { language, processVoicePayload, lastVoiceEvent, showToast } = useBusiness();
   const isAmharic = language === 'am';
   const voxide = useVoxideVoice(ai);
@@ -37,6 +43,7 @@ export default function VoiceLogger() {
   const [jsonInput, setJsonInput] = useState(
     JSON.stringify({ action: 'sale', item: 'Sugar', quantity: 3, amount: 390, language: 'en' }, null, 2)
   );
+  const [micModalState, setMicModalState] = useState(null); // null | 'prompt' | 'denied' | 'usage_limit' | 'network'
   const cleanupSessionRef = useRef(null);
 
   useEffect(() => {
@@ -60,25 +67,63 @@ export default function VoiceLogger() {
 
   const isBusy = effectiveState === 'listening' || effectiveState === 'processing';
 
-  const handleMicClick = async () => {
-    if (cleanupSessionRef.current) { cleanupSessionRef.current(); cleanupSessionRef.current = null; }
-    if (simState !== 'idle') { setSimState('idle'); setSimTranscript(''); setActivePresetId(null); return; }
-
+  const connectVoice = async () => {
+    haptic([20]);
     const isListening = ['listening','connecting','thinking','speaking','executing'].includes(voxide.status);
     try {
       await ensureInitialized();
-      if (isListening) await voxide.disconnect(); else await voxide.connect();
+      if (isListening) {
+        await voxide.disconnect();
+      } else {
+        await voxide.connect();
+      }
+      setMicModalState(null);
     } catch (err) {
       console.error('Voxide activation error:', err);
-      showToast(
-        isAmharic
-          ? 'የቀጥታ ድምፅ ግንኙነት አልተሳካም፤ የፈተና ናሙናውን በመጠቀም ላይ...'
-          : 'Live audio stream unavailable. Falling back to test simulation.',
-        'warning'
-      );
-      const langPresets = VOXIDE_PRESETS.filter(p => p.language === language);
-      runVoiceSimulation(langPresets[0] || VOXIDE_PRESETS[0]);
+      const msg = err?.message?.toLowerCase() ?? '';
+      if (msg.includes('denied') || msg.includes('notallowed')) {
+        setMicModalState('denied');
+      } else if (msg.includes('usage') || msg.includes('limit') || msg.includes('quota')) {
+        setMicModalState('usage_limit');
+      } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed')) {
+        setMicModalState('network');
+      } else {
+        // Generic fallback — show warning and use simulation
+        showToast(
+          isAmharic
+            ? 'የቀጥታ ድምፅ ግንኙነት አልተሳካም፤ ሲሙሌሽን ሁናቴ ጥቅም ላይ...'
+            : 'Live audio unavailable. Using simulation mode.',
+          'warning'
+        );
+        const langPresets = VOXIDE_PRESETS.filter(p => p.language === language);
+        runVoiceSimulation(langPresets[0] || VOXIDE_PRESETS[0]);
+      }
     }
+  };
+
+  const handleMicClick = async () => {
+    if (cleanupSessionRef.current) { cleanupSessionRef.current(); cleanupSessionRef.current = null; }
+    if (simState !== 'idle') { setSimState('idle'); setSimTranscript(''); setActivePresetId(null); return; }
+    // Show permission prompt before connecting for the first time
+    const permGranted = localStorage.getItem('birrvoice-mic-permission');
+    if (!permGranted) {
+      setMicModalState('prompt');
+      return;
+    }
+    await connectVoice();
+  };
+
+  const handleMicAllow = async () => {
+    localStorage.setItem('birrvoice-mic-permission', '1');
+    setMicModalState(null);
+    await connectVoice();
+  };
+
+  const handleMicDeny = () => {
+    setMicModalState(null);
+    // Fall back to simulation preset
+    const langPresets = VOXIDE_PRESETS.filter(p => p.language === language);
+    runVoiceSimulation(langPresets[0] || VOXIDE_PRESETS[0]);
   };
 
   const runVoiceSimulation = (preset) => {
@@ -96,6 +141,7 @@ export default function VoiceLogger() {
       },
       (payload) => {
         processVoicePayload(payload);
+        haptic([20, 50, 20]); // success haptic pattern
         setSimState('idle');
         setSimTranscript('');
         setActivePresetId(null);
@@ -126,12 +172,24 @@ export default function VoiceLogger() {
   const orbBase = 'flex items-center justify-center w-20 h-20 rounded-full transition-all duration-200 active:scale-95';
   const orbStyle =
     effectiveState === 'listening'  ? `${orbBase} bg-red-600 text-white scale-105 animate-listening-glow`
-    : effectiveState === 'processing' ? `${orbBase} bg-panel border-2 border-indigo-500/60 text-indigo-400`
+    : effectiveState === 'processing' ? `${orbBase} bg-panel border-2 border-teal/60 text-teal`
     : effectiveState === 'success'    ? `${orbBase} bg-emerald-600 text-white ring-2 ring-emerald-400/30`
-    : `${orbBase} bg-indigo-600 hover:bg-indigo-500 text-white animate-orb-breathe`;
+    : `${orbBase} text-white animate-orb-breathe`;
+  const orbInlineStyle = effectiveState === 'idle'
+    ? { background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }
+    : {};
+
 
   return (
-    <div className="rounded-xl bg-panel border border-theme p-6 sm:p-8 relative overflow-hidden transition-colors duration-300">
+    <>
+    <MicPermissionModal
+      isOpen={micModalState !== null}
+      error={micModalState === 'prompt' ? null : micModalState}
+      onAllow={handleMicAllow}
+      onDeny={handleMicDeny}
+      language={language}
+    />
+    <div className={`rounded-2xl bg-panel border border-theme relative overflow-hidden transition-colors duration-300 ${compact ? 'p-4 sm:p-5' : 'p-6 sm:p-8'}`}>
       {/* Indigo ambient glow behind orb */}
       <div className="absolute inset-0 glow-voice" />
 
@@ -145,10 +203,10 @@ export default function VoiceLogger() {
               key={i}
               className={`w-[3px] rounded-full transition-all ${
                 isBusy
-                  ? `bg-indigo-400 animate-audio-bar-${i + 1}`
-                  : 'bg-indigo-400/30'
+                  ? `bg-teal animate-audio-bar-${i + 1}`
+                  : 'bg-teal/30'
               }`}
-              style={{ height: isBusy ? undefined : `${h}px` }}
+              style={{ height: isBusy ? undefined : `${h}px`, backgroundColor: isBusy ? 'var(--c-teal)' : undefined }}
             />
           ))}
         </div>
@@ -158,6 +216,7 @@ export default function VoiceLogger() {
           id="voxide-mic-button"
           onClick={handleMicClick}
           className={orbStyle}
+          style={orbInlineStyle}
           title={effectiveState === 'listening' ? 'Click to finish' : 'Click to start voice input'}
         >
           {effectiveState === 'listening' ? (
@@ -337,5 +396,6 @@ export default function VoiceLogger() {
         )}
       </div>
     </div>
+    </>
   );
 }

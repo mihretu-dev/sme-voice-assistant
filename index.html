@@ -3,11 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AI Voice Assistant for Ethiopian SMEs - Real-time sales logging, inventory tracking, and expense management via voice audio streams." />
-    <title>Voxide SME Voice Assistant | የንግድ ድምፅ ረዳት</title>
+    <meta name="description" content="AI Voice Assistant for Ethiopian SMEs — real-time sales logging, inventory tracking, and expense management via voice in Amharic and English." />
+    <meta name="theme-color" content="#14b8a6" />
+
+    <!-- PWA / App Install -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BirrVoice" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="BirrVoice Ledger — Ethiopian SME Voice Assistant" />
+    <meta property="og:description" content="Log sales, track stock and expenses by speaking in Amharic or English. Powered by Voxide." />
+    <meta property="og:type" content="website" />
+
+    <title>BirrVoice Ledger | Voxide SME Voice Assistant | የኢትዮጵያ ንግድ ድምፅ ረዳት</title>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Prevent FOUC: apply saved theme before first paint -->
     <script>
       (function(){
@@ -18,8 +35,19 @@
       })();
     </script>
   </head>
-  <body class="h-full antialiased font-sans selection:bg-indigo-500 selection:text-white">
+  <body class="h-full antialiased selection:bg-teal-500/30 selection:text-teal-100">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Register Service Worker for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            console.warn('[SW] Registration failed:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

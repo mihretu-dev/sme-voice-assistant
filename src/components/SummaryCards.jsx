@@ -25,21 +25,16 @@ function useHourlySparkline(transactions, type, hours = 8) {
 
 function Sparkline({ points, color, gradientId }) {
   const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ');
-  // Build a filled polygon: line points + bottom-right + bottom-left
-  const polygonPoints =
-    points.map(p => `${p.x},${p.y}`).join(' ') + ' 100,24 0,24';
-
+  const polygonPoints = points.map(p => `${p.x},${p.y}`).join(' ') + ' 100,24 0,24';
   return (
     <svg width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none" className="mt-2">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={color} stopOpacity="0.35" />
+          <stop offset="0%"   stopColor={color} stopOpacity="0.30" />
           <stop offset="100%" stopColor={color} stopOpacity="0"    />
         </linearGradient>
       </defs>
-      {/* Gradient fill */}
       <polygon points={polygonPoints} fill={`url(#${gradientId})`} />
-      {/* Line */}
       <polyline
         points={polylinePoints}
         fill="none"
@@ -62,95 +57,91 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
 
   const isDeficit = summary.netCash < 0;
 
+  // Parse number from formatETB for display split (number vs unit)
+  const salesNum    = summary.todaySales;
+  const expenseNum  = summary.todayExpenses;
+  const netNum      = summary.netCash;
+
+  function displayAmount(num) {
+    const abs = Math.abs(num);
+    if (abs >= 1_000_000) return { val: (abs / 1_000_000).toFixed(1), unit: 'M ETB' };
+    if (abs >= 1_000)     return { val: (abs / 1_000).toFixed(1),     unit: 'k ETB' };
+    return { val: abs.toLocaleString('en-US', { minimumFractionDigits: 0 }), unit: 'ETB' };
+  }
+
   const cards = [
     {
-      id: 'sales',
-      title:       isAmharic ? 'የዛሬ ሽያጭ ድምር' : 'Daily Inflow (Sales)',
-      subtitle:    `${summary.salesCount} ${isAmharic ? 'ግብይቶች ዛሬ' : 'transactions logged'}`,
-      amount:      formatETB(summary.todaySales),
-      icon:        TrendingUp,
-      iconColor:   'text-emerald-400',
-      badgeText:   isAmharic ? 'ገቢ' : 'Inflow',
-      badgeStyle:  'text-emerald-400 bg-emerald-950/40 border-emerald-800/40',
-      accentTop:   'before:bg-emerald-500/40',
-      sparkColor:  '#34d399',
-      gradientId:  'sg-sales',
+      id:         'sales',
+      title:      isAmharic ? 'የዛሬ ሽያጭ ድምር' : 'Daily Inflow (Sales)',
+      sub:        `${summary.salesCount} ${isAmharic ? 'ግብይቶች' : 'transactions'}`,
+      display:    displayAmount(salesNum),
+      icon:       TrendingUp,
+      iconBg:     'bg-emerald-500/10',
+      iconColor:  'text-emerald-400',
+      sparkColor: '#34d399',
+      gradientId: 'sg-sales',
       sparkPoints: salesPoints,
+      badge:      isAmharic ? 'ገቢ' : 'Inflow',
+      badgeClass: 'text-emerald-400 bg-emerald-950/30 border-emerald-800/40',
     },
     {
-      id: 'expenses',
-      title:       isAmharic ? 'የዛሬ ወጪዎች' : 'Daily Outflow (Expenses)',
-      subtitle:    isAmharic ? 'የሱቅ እና የአሠራር ወጪ' : 'Store expenses & costs',
-      amount:      formatETB(summary.todayExpenses),
-      icon:        TrendingDown,
-      iconColor:   'text-rose-400',
-      badgeText:   isAmharic ? 'ወጪ' : 'Outflow',
-      badgeStyle:  'text-rose-400 bg-rose-950/40 border-rose-800/40',
-      accentTop:   'before:bg-rose-500/40',
-      sparkColor:  '#fb7185',
-      gradientId:  'sg-expenses',
+      id:         'expenses',
+      title:      isAmharic ? 'የዛሬ ወጪዎች' : 'Daily Outflow (Expenses)',
+      sub:        isAmharic ? 'የሱቅ ወጪ' : 'Store expenses',
+      display:    displayAmount(expenseNum),
+      icon:       TrendingDown,
+      iconBg:     'bg-rose-500/10',
+      iconColor:  'text-rose-400',
+      sparkColor: '#fb7185',
+      gradientId: 'sg-expenses',
       sparkPoints: expensePoints,
+      badge:      isAmharic ? 'ወጪ' : 'Outflow',
+      badgeClass: 'text-rose-400 bg-rose-950/30 border-rose-800/40',
     },
     {
-      id: 'net-cash',
-      title:      isAmharic ? 'የተጣራ ጥሬ ገንዘብ' : 'Net Cash Margin',
-      subtitle:   isAmharic ? 'ሽያጭ ሲቀነስ ወጪ' : 'Sales minus expenses',
-      amount:     formatETB(summary.netCash),
-      icon:       Wallet,
-      iconColor:  isDeficit ? 'text-amber-400' : 'text-emerald-400',
-      badgeText:  isDeficit ? (isAmharic ? 'ጉድለት' : 'Deficit') : (isAmharic ? 'ትርፍ' : 'Net Positive'),
-      badgeStyle: isDeficit
-        ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-        : 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40',
-      accentTop:  isDeficit ? 'before:bg-amber-500/40' : 'before:bg-emerald-500/40',
-      deficitBg:  isDeficit,
-    },
-    {
-      id: 'low-stock',
-      title:     isAmharic ? 'ዝቅተኛ ክምችት ማስጠንቀቂያ' : 'Low Stock Items',
-      subtitle:  summary.lowStockCount > 0
-        ? (isAmharic ? `${summary.lowStockCount} ዕቃዎች ከደረጃ በታች` : `${summary.lowStockCount} item(s) below reorder level`)
-        : (isAmharic ? 'ሁሉም ዕቃዎች ደህና ናቸው' : 'All items at healthy stock'),
-      amount:    `${summary.lowStockCount} ${isAmharic ? 'ዕቃዎች' : 'Items'}`,
-      icon:      AlertCircle,
-      iconColor: summary.lowStockCount > 0 ? 'text-amber-400' : 'text-t3',
-      badgeText: summary.lowStockCount > 0 ? (isAmharic ? 'አስቸኳይ' : 'Reorder') : (isAmharic ? 'ደህና' : 'Normal'),
-      badgeStyle: summary.lowStockCount > 0
-        ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-        : 'text-t3 bg-raised border-theme',
-      accentTop: summary.lowStockCount > 0 ? 'before:bg-amber-500/40' : 'before:bg-surface',
-      onClick:   onSelectLowStockFilter,
+      id:        'net-cash',
+      title:     isAmharic ? 'የተጣራ ጥሬ ገንዘብ' : 'Net Cash Margin',
+      sub:       isAmharic ? 'ሽያጭ ሲቀነስ ወጪ' : 'Sales minus expenses',
+      display:   displayAmount(netNum),
+      prefix:    netNum < 0 ? '−' : '',
+      icon:      Wallet,
+      iconBg:    isDeficit ? 'bg-amber-500/10' : 'bg-teal-muted',
+      iconColor: isDeficit ? 'text-amber-400' : 'text-teal',
+      badge:     isDeficit ? (isAmharic ? 'ጉድለት' : 'Deficit') : (isAmharic ? 'ትርፍ' : 'Surplus'),
+      badgeClass: isDeficit
+        ? 'text-amber-400 bg-amber-950/30 border-amber-800/40'
+        : 'text-teal bg-teal-muted border-teal/30',
+      deficitBg: isDeficit,
     },
   ];
 
   return (
-    <section aria-label="Business Metrics Summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+    <section aria-label="Business Metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.id}
-            onClick={card.onClick}
             className={[
-              // Base card
-              'relative rounded-xl bg-panel border border-theme p-4 transition-all duration-200',
-              'before:absolute before:inset-x-4 before:top-0 before:h-[2px] before:rounded-full',
-              card.accentTop,
-              // Hover lift
-              card.onClick ? 'cursor-pointer hover:border-indigo-500/30 hover:-translate-y-0.5 hover:shadow-lg' : 'hover:-translate-y-0.5 hover:shadow-md',
-              // Deficit tint
-              card.deficitBg ? 'bg-amber-950/10' : '',
+              'rounded-2xl bg-panel border border-theme p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg',
+              card.deficitBg ? 'border-amber-800/30' : '',
             ].join(' ')}
           >
-            {/* Title row */}
-            <div className="flex items-center justify-between gap-2 mb-2.5">
+            {/* Header row */}
+            <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium text-t3">{card.title}</span>
-              <Icon className={`w-4 h-4 ${card.iconColor}`} />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}>
+                <Icon className={`w-4 h-4 ${card.iconColor}`} />
+              </div>
             </div>
 
             {/* Amount */}
-            <div className="text-2xl font-bold tracking-tight text-t1 tabular-nums">
-              {card.amount}
+            <div className="flex items-baseline gap-1.5">
+              {card.prefix && <span className="text-2xl font-bold text-t2">{card.prefix}</span>}
+              <span className="text-3xl font-bold tracking-tight text-t1 tabular-nums">
+                {card.display.val}
+              </span>
+              <span className="text-sm font-semibold text-t3">{card.display.unit}</span>
             </div>
 
             {/* Sparkline */}
@@ -163,10 +154,10 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
             )}
 
             {/* Footer */}
-            <div className="mt-3 flex items-center justify-between text-xs pt-2.5 border-t border-theme-muted">
-              <span className="truncate text-[11px] text-t3">{card.subtitle}</span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${card.badgeStyle}`}>
-                {card.badgeText}
+            <div className="mt-3 flex items-center justify-between text-[11px] pt-2.5 border-t border-theme-muted">
+              <span className="text-t4 truncate">{card.sub}</span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${card.badgeClass}`}>
+                {card.badge}
               </span>
             </div>
           </div>

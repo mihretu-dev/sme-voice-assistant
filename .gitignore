@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# ── Environment / Secrets ─────────────────────────────────────────────────
+# IMPORTANT: Never commit .env files containing API keys.
+# Use .env.example as a template (committed, no real values).
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

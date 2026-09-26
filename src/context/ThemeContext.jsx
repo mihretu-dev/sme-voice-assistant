@@ -10,7 +10,6 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const html = document.documentElement;
     html.setAttribute('data-theme', theme);
-    // Keep class in sync for any direct CSS class selectors
     if (theme === 'light') {
       html.classList.add('light');
       html.classList.remove('dark');

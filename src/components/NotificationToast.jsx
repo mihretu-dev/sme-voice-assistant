@@ -3,70 +3,50 @@ import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
 import { useBusiness } from '../context/BusinessContext';
 
 export default function NotificationToast() {
-  const { notification } = useBusiness();
-  const drainRef = useRef(null);
+  const { notification, clearNotification } = useBusiness();
+  const timerRef = useRef(null);
 
-  // Restart the drain animation when notification changes
   useEffect(() => {
-    if (notification && drainRef.current) {
-      drainRef.current.style.animation = 'none';
-      // Force reflow
-      void drainRef.current.offsetWidth;
-      drainRef.current.style.animation = '';
-    }
-  }, [notification?.message]);
+    if (!notification) return;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(clearNotification, 3500);
+    return () => clearTimeout(timerRef.current);
+  }, [notification, clearNotification]);
 
   if (!notification) return null;
 
-  const isSuccess = notification.type === 'success';
-  const isWarning = notification.type === 'warning';
-  const isError   = notification.type === 'error';
+  const config = {
+    success: { Icon: CheckCircle2, badge: 'bg-emerald-500/15 border-emerald-500/30', iconClass: 'text-emerald-400', label: 'bg-emerald-500' },
+    error:   { Icon: AlertCircle,  badge: 'bg-rose-500/15 border-rose-500/30',    iconClass: 'text-rose-400',    label: 'bg-rose-500' },
+    info:    { Icon: Info,          badge: 'bg-teal/10 border-teal/30',             iconClass: 'text-teal',        label: 'bg-teal' },
+    warning: { Icon: AlertTriangle, badge: 'bg-amber-500/15 border-amber-500/30',  iconClass: 'text-amber-400',   label: 'bg-amber-500' },
+  };
 
-  const borderColor = isSuccess ? 'border-emerald-700/60'
-    : isWarning ? 'border-amber-700/60'
-    : isError   ? 'border-rose-700/60'
-    :             'border-theme';
-
-  const drainColor = isSuccess ? 'bg-emerald-500'
-    : isWarning ? 'bg-amber-500'
-    : isError   ? 'bg-rose-500'
-    :             'bg-indigo-500';
-
-  const iconBg = isSuccess ? 'bg-emerald-500/15 text-emerald-400'
-    : isWarning ? 'bg-amber-500/15 text-amber-400'
-    : isError   ? 'bg-rose-500/15 text-rose-400'
-    :             'bg-indigo-500/15 text-indigo-400';
+  const type = notification.type || 'info';
+  const { Icon, badge, iconClass, label } = config[type] || config.info;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full sm:w-auto">
-      <div
-        className={`toast-enter relative overflow-hidden flex items-start gap-3 px-4 py-3.5 rounded-xl bg-panel border ${borderColor} shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-sm`}
-      >
-        {/* Icon */}
-        <div className={`flex items-center justify-center w-8 h-8 rounded-lg shrink-0 ${iconBg}`}>
-          {isSuccess  ? <CheckCircle2  className="w-4 h-4" />
-          : isWarning ? <AlertTriangle className="w-4 h-4" />
-          : isError   ? <AlertCircle   className="w-4 h-4" />
-          :             <Info          className="w-4 h-4" />}
-        </div>
+    <div className="fixed bottom-6 left-6 z-[70] max-w-[320px] w-full" role="alert" aria-live="polite">
+      <div className={`toast-enter relative bg-panel border rounded-2xl shadow-2xl overflow-hidden ${badge}`}>
+        {/* Progress drain bar */}
+        <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${label} toast-drain opacity-60`} />
 
-        {/* Message */}
-        <div className="flex-1 pt-0.5 min-w-0">
-          <p className="text-xs font-semibold text-t1 leading-snug">
-            {isSuccess ? (notification.title || 'Transaction Recorded') : ''}
-          </p>
-          <p className={`text-xs leading-relaxed mt-0.5 ${isSuccess ? 'text-t2' : 'text-t1'}`}>
+        <div className="flex items-start gap-3 px-4 py-3.5 pr-10">
+          <div className={`shrink-0 mt-0.5 ${iconClass}`}>
+            <Icon className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-t1 leading-relaxed font-medium pr-1">
             {notification.message}
           </p>
         </div>
 
-        {/* Progress drain bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-raised overflow-hidden rounded-full">
-          <div
-            ref={drainRef}
-            className={`h-full ${drainColor} toast-drain`}
-          />
-        </div>
+        <button
+          onClick={clearNotification}
+          className="absolute top-3 right-3 text-t4 hover:text-t2 transition-colors"
+          aria-label="Dismiss"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );
