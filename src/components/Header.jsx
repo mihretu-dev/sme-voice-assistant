@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, AudioWaveform, Store, Sun, Moon } from 'lucide-react';
+import { RotateCcw, AudioWaveform, Store, Sun, Moon, FileText, ExternalLink } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -47,6 +47,19 @@ export default function Header() {
 
         {/* Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+
+          {/* Scholarxiv Ideation link (Rule 01) */}
+          <a
+            href="https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-raised border border-theme text-[11px] font-medium text-t3 hover:text-indigo-400 hover:border-indigo-500/40 transition-colors"
+            title="Scholarxiv Ideation Documentation (STARK Hackathon Rule 01)"
+          >
+            <FileText className="w-3 h-3 text-indigo-400" />
+            <span>Scholarxiv Ideation</span>
+            <ExternalLink className="w-2.5 h-2.5 text-t4" />
+          </a>
 
           {/* Live status pill */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-raised border border-theme text-[11px] font-mono text-t3">

@@ -6,9 +6,11 @@ Built with **React 18**, **Vite**, **Tailwind CSS**, and **Lucide React**.
 
 ---
 
-## 📄 Ideation & Research (STARK Hackathon Rule 01)
+## 📄 Ideation & Research (STARK Hackathon Rule 01: Prove Your Ideation)
 - **Scholarxiv Ideation Paper**: [BirrVoice Ledger on Scholarxiv](https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92)
+- **Local Ideation Document**: [docs/IDEATION.md](docs/IDEATION.md)
 - **Authors**: Mihretu Hizkel & Hamerenoh Demelash (Team Pixel & Code)
+- **Problem & Solution Summary**: Documents the research and ideation behind voice-first bookkeeping for Ethiopian informal SME merchants, addressing manual receipt loss, language barriers, and stockout tracking through conversational Voxide voice streams and real-time ETB ledger tracking.
 
 ---
 

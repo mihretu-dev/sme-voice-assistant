@@ -52,8 +52,19 @@ function DashboardContent() {
             <ShieldCheck className="w-3.5 h-3.5 text-t3" />
             <span>BirrVoice Ledger • SME Merchant Point-of-Sale &amp; Stock System</span>
           </div>
-          <div className="font-mono text-[11px] text-t4">
-            Audio Sample: 16kHz PCM • Currency: ETB
+          <div className="flex items-center gap-3 font-mono text-[11px] text-t4">
+            <a
+              href="https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
+            >
+              Scholarxiv Ideation Paper
+            </a>
+            <span>•</span>
+            <span>Audio: 16kHz PCM</span>
+            <span>•</span>
+            <span>Currency: ETB</span>
           </div>
         </div>
       </footer>
