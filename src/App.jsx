@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { BusinessProvider } from './context/BusinessContext';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { BusinessProvider, useBusiness } from './context/BusinessContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
@@ -11,104 +11,196 @@ import AddItemModal from './components/AddItemModal';
 import NotificationToast from './components/NotificationToast';
 import OnboardingModal from './components/OnboardingModal';
 import { VoxideBridge } from './components/VoxideBridge';
-import { FileText, ExternalLink } from 'lucide-react';
+import { FileText, ExternalLink, X, Keyboard } from 'lucide-react';
 
+// ── Help Modal ────────────────────────────────────────────────────────────────
+function HelpModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-md bg-panel border border-theme rounded-2xl shadow-2xl p-6 modal-enter">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-t4 hover:text-t2 transition-colors"
+          aria-label="Close Help"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-teal-muted flex items-center justify-center" style={{ backgroundColor: 'var(--c-teal-muted)' }}>
+            <Keyboard className="w-5 h-5" style={{ color: 'var(--c-teal)' }} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-t1">Help & Keyboard Shortcuts</h3>
+            <p className="text-[11px] text-t4">BirrVoice Ledger quick reference</p>
+          </div>
+        </div>
+
+        {/* Keyboard shortcuts table */}
+        <div className="space-y-1.5 mb-5">
+          {[
+            { key: 'K',   desc: 'Activate / Stop voice mic' },
+            { key: 'N',   desc: 'Open "Add New Item" modal' },
+            { key: 'D',   desc: 'Go to Dashboard' },
+            { key: 'V',   desc: 'Go to Voice Logger' },
+            { key: '?',   desc: 'Open this Help panel' },
+          ].map(({ key, desc }) => (
+            <div key={key} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-raised border border-theme">
+              <kbd className="min-w-[28px] text-center px-2 py-1 rounded-md bg-surface border border-theme text-[11px] font-mono font-bold text-t1">
+                {key}
+              </kbd>
+              <span className="text-xs text-t2">{desc}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick tip */}
+        <div className="p-3 rounded-xl bg-teal-muted border border-teal/20 text-[11px] text-t2 leading-relaxed" style={{ backgroundColor: 'var(--c-teal-muted)', borderColor: 'color-mix(in srgb, var(--c-teal) 20%, transparent)' }}>
+          <strong className="text-t1">Tip:</strong> Click the mic orb or press <kbd className="px-1.5 py-0.5 bg-panel border border-theme rounded text-[10px] font-mono">K</kbd> to start live voice logging.
+          Use preset chips in "Testing Tools" for demo without using live credits.
+        </div>
+
+        {/* Links */}
+        <div className="mt-4 pt-4 border-t border-theme flex items-center gap-3 text-[11px]">
+          <a
+            href="https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 hover:underline"
+            style={{ color: 'var(--c-teal)' }}
+          >
+            <FileText className="w-3 h-3" />
+            Ideation Paper
+            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+          </a>
+          <span className="text-t4">•</span>
+          <span className="text-t4">v1.0 — STARK Hackathon 2026</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page config ───────────────────────────────────────────────────────────────
 const PAGE_CONFIG = {
-  voice:     { title: 'Voice Logger',   desc: 'Live voice ingestion & simulation' },
-  dashboard: { title: 'Dashboard',      desc: 'Sales, stock & cash summary' },
-  calendar:  { title: 'Reports',        desc: 'Date-range summaries & exports' },
-  team:      { title: 'Team',           desc: 'Merchant accounts' },
+  voice:    { title: 'Voice Logger', desc: 'Live voice ingestion & simulation' },
+  dashboard:{ title: 'Dashboard',   desc: 'Sales, stock & cash summary' },
+  calendar: { title: 'Reports',     desc: 'Date-range summaries & exports' },
 };
 
+// ── Dashboard inner ───────────────────────────────────────────────────────────
 function DashboardContent() {
-  const [activePage, setActivePage]           = useState('dashboard');
-  const [isAddModalOpen, setIsAddModalOpen]   = useState(false);
+  const { notification } = useBusiness();
+
+  const [activePage, setActivePage]         = useState('dashboard');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filterLowStockOnly, setFilterLowStockOnly] = useState(false);
-  const [showOnboarding, setShowOnboarding]   = useState(
+  const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('birrvoice-onboarded')
   );
+  const [showHelp, setShowHelp]             = useState(false);
+  const [bellOpen, setBellOpen]             = useState(false);
+  const [notificationLog, setNotificationLog] = useState([]);
+
+  // Collect every notification into the log for the bell panel
+  const prevNotifId = useRef(null);
+  useEffect(() => {
+    if (notification && notification.id !== prevNotifId.current) {
+      prevNotifId.current = notification.id;
+      setNotificationLog(prev => [notification, ...prev].slice(0, 50));
+    }
+  }, [notification]);
+
+  // Close bell panel when clicking outside
+  const bellRef = useRef(null);
+  useEffect(() => {
+    if (!bellOpen) return;
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        setBellOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [bellOpen]);
 
   const handleSelectLowStockFilter = useCallback(() => {
     setFilterLowStockOnly(true);
     setActivePage('dashboard');
-    const tableEl = document.getElementById('inventory-section');
-    if (tableEl) setTimeout(() => tableEl.scrollIntoView({ behavior: 'smooth' }), 100);
+    const el = document.getElementById('inventory-section');
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
   }, []);
 
-  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
-      // Ignore if focus is in an input/textarea/select
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
-
       switch (e.key.toLowerCase()) {
-        case 'k':
-          // Open/trigger the mic orb
-          document.getElementById('voxide-mic-button')?.click();
-          break;
-        case 'n':
-          setIsAddModalOpen(true);
-          break;
-        case 'd':
-          setActivePage('dashboard');
-          break;
-        case 'v':
-          setActivePage('voice');
-          break;
-        case '?':
-          setShowOnboarding(true);
-          break;
-        default:
-          break;
+        case 'k': document.getElementById('voxide-mic-button')?.click(); break;
+        case 'n': setIsAddModalOpen(true); break;
+        case 'd': setActivePage('dashboard'); break;
+        case 'v': setActivePage('voice'); break;
+        case '?': setShowHelp(true); break;
+        default: break;
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const page   = PAGE_CONFIG[activePage] ?? PAGE_CONFIG.dashboard;
-  const isVoice = activePage === 'voice';
+  const page = PAGE_CONFIG[activePage] ?? PAGE_CONFIG.dashboard;
 
   return (
     <div className="min-h-screen bg-page flex antialiased transition-colors duration-300">
-      {/* Left Sidebar */}
-      <Sidebar activePage={activePage} setActivePage={setActivePage} />
+      {/* Sidebar */}
+      <Sidebar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        onHelpClick={() => setShowHelp(true)}
+      />
 
-      {/* Main content area — offset by sidebar width */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 ml-16">
         {/* Topbar */}
-        <Topbar pageTitle={page.title} />
+        <div ref={bellRef}>
+          <Topbar
+            pageTitle={page.title}
+            notificationLog={notificationLog}
+            onBellClick={() => setBellOpen(o => !o)}
+            bellOpen={bellOpen}
+            onBellClose={() => setBellOpen(false)}
+          />
+        </div>
 
-        {/* Page content */}
         <main className="flex-1 p-5 md:p-6 space-y-5 overflow-y-auto">
-
-          {/* Page heading row */}
+          {/* Page heading */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-t1">{page.title}</h1>
               <p className="text-xs text-t3 mt-0.5">{page.desc}</p>
             </div>
-            {/* Teal primary CTA matching screenshot "Dashboard" button */}
             <button
               onClick={() => setActivePage('dashboard')}
               className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 shadow-sm"
-              style={{ background: activePage === 'dashboard' ? 'linear-gradient(135deg, #14b8a6, #0d9488)' : '#1e293b' }}
+              style={{ background: activePage === 'dashboard' ? 'linear-gradient(135deg, #14b8a6, #0d9488)' : 'var(--c-raised)', color: activePage === 'dashboard' ? 'white' : 'var(--c-text-2)' }}
             >
               <span className="text-base leading-none">⊞</span>
               Dashboard
             </button>
           </div>
 
-          {/* Keyboard shortcut hint (subtle) */}
+          {/* Keyboard hint strip */}
           <div className="hidden lg:flex items-center gap-4 text-[11px] text-t4 font-mono">
-            <span><kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">K</kbd> Voice</span>
-            <span><kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">N</kbd> New Item</span>
-            <span><kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">D</kbd> Dashboard</span>
-            <span><kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">?</kbd> Help</span>
+            {[['K','Voice'],['N','New Item'],['D','Dashboard'],['V','Voice Page'],['?','Help']].map(([k, label]) => (
+              <span key={k}>
+                <kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">{k}</kbd>{' '}
+                {label}
+              </span>
+            ))}
           </div>
 
           {/* Voice Logger page */}
-          {isVoice && (
+          {activePage === 'voice' && (
             <section aria-label="Voice Ingestion Console">
               <VoiceLogger />
             </section>
@@ -117,15 +209,10 @@ function DashboardContent() {
           {/* Dashboard page */}
           {activePage === 'dashboard' && (
             <>
-              {/* Summary Cards */}
               <SummaryCards onSelectLowStockFilter={handleSelectLowStockFilter} />
-
-              {/* Voice Logger (compact, in dashboard) */}
               <section aria-label="Voice Ingestion Console">
                 <VoiceLogger compact />
               </section>
-
-              {/* Stock + Ledger */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 <div id="inventory-section" className="lg:col-span-7">
                   <InventoryTable
@@ -141,12 +228,12 @@ function DashboardContent() {
             </>
           )}
 
-          {/* Placeholder pages */}
+          {/* Calendar/Reports placeholder */}
           {activePage === 'calendar' && (
             <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-raised border border-theme flex items-center justify-center text-2xl">📅</div>
               <p className="text-sm font-medium text-t2">Calendar & Reports</p>
-              <p className="text-xs text-t4 max-w-xs">Date-range summaries, Ethiopian calendar view, and CSV exports coming soon.</p>
+              <p className="text-xs text-t4 max-w-xs">Date-range summaries, Ethiopian calendar view, and full CSV exports coming soon.</p>
               <button
                 onClick={() => setActivePage('dashboard')}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
@@ -156,33 +243,24 @@ function DashboardContent() {
               </button>
             </div>
           )}
-
-          {activePage === 'team' && (
-            <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-raised border border-theme flex items-center justify-center text-2xl">👥</div>
-              <p className="text-sm font-medium text-t2">Team Management</p>
-              <p className="text-xs text-t4 max-w-xs">Multi-merchant accounts and role management coming soon.</p>
-            </div>
-          )}
         </main>
 
         {/* Footer */}
         <footer className="border-t border-theme bg-panel py-3 px-6 text-[11px] text-t4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>BirrVoice Ledger • STARK Hackathon — Team Pixel &amp; Code</span>
+            <span>BirrVoice Ledger • STARK Hackathon 2026</span>
             <div className="flex items-center gap-3 font-mono">
               <a
                 href="https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-teal hover:text-teal/80 transition-colors"
+                className="flex items-center gap-1 hover:underline transition-colors"
+                style={{ color: 'var(--c-teal)' }}
               >
                 <FileText className="w-3 h-3" />
                 <span>Scholarxiv</span>
                 <ExternalLink className="w-2.5 h-2.5 opacity-60" />
               </a>
-              <span>•</span>
-              <span>Audio: 16kHz PCM</span>
               <span>•</span>
               <span>ETB</span>
             </div>
@@ -190,10 +268,11 @@ function DashboardContent() {
         </footer>
       </div>
 
-      {/* Modals & Overlays */}
+      {/* Modals */}
       <AddItemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       <NotificationToast />
       <VoxideBridge />
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
     </div>
   );

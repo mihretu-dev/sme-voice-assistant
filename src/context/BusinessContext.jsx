@@ -162,10 +162,9 @@ export function BusinessProvider({ children }) {
   // Show auto-expiring notification banner/toast
   const showToast = (message, type = 'success') => {
     setNotification({ message, type, id: Date.now() });
-    setTimeout(() => {
-      setNotification((prev) => (prev?.id === notification?.id ? null : prev));
-    }, 4500);
   };
+
+  const clearNotification = () => setNotification(null);
 
   /**
    * Main Engine: Handles incoming structured JSON from Voxide audio streams or simulation
@@ -364,8 +363,18 @@ export function BusinessProvider({ children }) {
     setInventory(INITIAL_INVENTORY);
     setTransactions(INITIAL_TRANSACTIONS);
     setLastVoiceEvent(null);
-    showToast('Reset to demo enterprise data.', 'info');
+    showToast('Demo data loaded.', 'info');
   };
+
+  const clearDemoData = () => {
+    setInventory([]);
+    setTransactions([]);
+    setLastVoiceEvent(null);
+    showToast('All data cleared.', 'warning');
+  };
+
+  // True when there is any data present
+  const hasData = inventory.length > 0 || transactions.length > 0;
 
   // Computed business aggregates
   const summary = useMemo(() => {
@@ -416,11 +425,14 @@ export function BusinessProvider({ children }) {
         setLanguage,
         lastVoiceEvent,
         notification,
+        clearNotification,
         summary,
         processVoicePayload,
         adjustStock,
         addInventoryItem,
         resetToDemo,
+        clearDemoData,
+        hasData,
         showToast,
       }}
     >
