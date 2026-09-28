@@ -3,13 +3,21 @@ import { X, PackagePlus } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 
 const CATEGORIES = [
-  { value: 'Commodities', en: 'Commodities', am: 'መሰረታዊ ሸቀጦች' },
-  { value: 'Grains', en: 'Grains & Flours', am: 'እህሎችና ዱቄት' },
-  { value: 'Oils', en: 'Cooking Oils', am: 'ዘይቶች' },
-  { value: 'Beverages', en: 'Beverages & Coffee', am: 'መጠጦችና ቡና' },
-  { value: 'Hygiene', en: 'Hygiene & Cleaning', am: 'የጽዳት ዕቃዎች' },
-  { value: 'Spices', en: 'Spices', am: 'ቅመማ ቅመሞች' },
-  { value: 'Other', en: 'Other', am: 'ሌሎች' },
+  { value: 'Commodities', en: 'Commodities',         am: 'መሰረታዊ ሸቀጦች' },
+  { value: 'Grains',      en: 'Grains & Flours',     am: 'እህሎችና ዱቄት' },
+  { value: 'Oils',        en: 'Cooking Oils',        am: 'ዘይቶች' },
+  { value: 'Beverages',   en: 'Beverages & Coffee',  am: 'መጠጦችና ቡና' },
+  { value: 'Hygiene',     en: 'Hygiene & Cleaning',  am: 'የጽዳት ዕቃዎች' },
+  { value: 'Spices',      en: 'Spices',              am: 'ቅመማ ቅመሞች' },
+  { value: 'Other',       en: 'Other Commodities',   am: 'ሌሎች ሸቀጦች' },
+];
+
+const UNITS = [
+  { value: 'kg',     en: 'Kilograms (kg)', am: 'ኪሎግራም (kg)' },
+  { value: 'Liters', en: 'Liters (L)',     am: 'ሊትር (Liters)' },
+  { value: 'Pcs',    en: 'Pieces (Pcs)',   am: 'ፍሬ (Pcs)' },
+  { value: 'Bags',   en: 'Bags / Sacks',   am: 'ጆንያ / ቦርሳ' },
+  { value: 'Pack',   en: 'Pack / Carton',  am: 'ፓኬት / ካርቶን' },
 ];
 
 export default function AddItemModal({ isOpen, onClose }) {
@@ -48,11 +56,10 @@ export default function AddItemModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
       <div className="relative w-full max-w-md rounded-2xl bg-panel border border-theme shadow-2xl p-5 modal-enter">
-        
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-theme">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+            <div className="w-8 h-8 rounded-lg bg-teal-muted flex items-center justify-center text-teal">
               <PackagePlus className="w-4 h-4" />
             </div>
             <div>
@@ -60,14 +67,17 @@ export default function AddItemModal({ isOpen, onClose }) {
                 {isAmharic ? 'አዲስ ዕቃ መዝግብ' : 'Add Inventory Item'}
               </h3>
               <p className="text-[11px] text-t3">
-                {isAmharic ? 'የእቃውን መረጃ በትክክል ያስገቡ' : 'Enter product details to add to stock'}
+                {isAmharic
+                  ? 'የእቃውን መረጃ በትክክል ያስገቡ'
+                  : 'Enter product details to add to stock'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-t3 hover:text-t1 hover:bg-hover transition-colors"
-            title="Close"
+            title={isAmharic ? 'ዝጋ' : 'Close'}
+            aria-label={isAmharic ? 'ዝጋ' : 'Close'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -86,7 +96,7 @@ export default function AddItemModal({ isOpen, onClose }) {
                 placeholder="e.g. White Sugar"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               />
             </div>
 
@@ -99,19 +109,19 @@ export default function AddItemModal({ isOpen, onClose }) {
                 placeholder="ለምሳሌ፡ ነጭ ስኳር"
                 value={formData.nameAm}
                 onChange={(e) => setFormData({ ...formData, nameAm: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-t2 mb-1">
-              {isAmharic ? 'ምድብ' : 'Category'}
+              {isAmharic ? 'የዕቃ ምድብ' : 'Category'}
             </label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+              className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value} className="bg-panel text-t1">
@@ -124,7 +134,7 @@ export default function AddItemModal({ isOpen, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-t2 mb-1">
-                {isAmharic ? 'መጠን' : 'Initial Quantity'}
+                {isAmharic ? 'የመጀመሪያ ክምችት መጠን' : 'Initial Quantity'}
               </label>
               <input
                 type="number"
@@ -132,24 +142,24 @@ export default function AddItemModal({ isOpen, onClose }) {
                 placeholder="0"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-t2 mb-1">
-                {isAmharic ? 'መለኪያ' : 'Unit'}
+                {isAmharic ? 'መለኪያ መስፈርት' : 'Measurement Unit'}
               </label>
               <select
                 value={formData.unit}
                 onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-2.5 py-1.5 text-xs text-t1 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-2.5 py-1.5 text-xs text-t1 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               >
-                <option value="kg" className="bg-panel text-t1">kg</option>
-                <option value="Liters" className="bg-panel text-t1">Liters</option>
-                <option value="Pcs" className="bg-panel text-t1">Pcs</option>
-                <option value="Bags" className="bg-panel text-t1">Bags</option>
-                <option value="Pack" className="bg-panel text-t1">Pack</option>
+                {UNITS.map((u) => (
+                  <option key={u.value} value={u.value} className="bg-panel text-t1">
+                    {isAmharic ? u.am : u.en}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -157,7 +167,7 @@ export default function AddItemModal({ isOpen, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-t2 mb-1">
-                {isAmharic ? 'ነጠላ ዋጋ (ETB)' : 'Unit Price (ETB)'} *
+                {isAmharic ? 'ነጠላ የመሸጫ ዋጋ (ETB)' : 'Unit Price (ETB)'} *
               </label>
               <input
                 type="number"
@@ -166,13 +176,13 @@ export default function AddItemModal({ isOpen, onClose }) {
                 placeholder="0.00"
                 value={formData.unitPrice}
                 onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-t2 mb-1">
-                {isAmharic ? 'የማስጠንቀቂያ ገደብ' : 'Min Alert Threshold'}
+                {isAmharic ? 'አነስተኛ ክምችት ማስጠንቀቂያ' : 'Min Alert Threshold'}
               </label>
               <input
                 type="number"
@@ -180,7 +190,7 @@ export default function AddItemModal({ isOpen, onClose }) {
                 placeholder="10"
                 value={formData.minThreshold}
                 onChange={(e) => setFormData({ ...formData, minThreshold: e.target.value })}
-                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                className="w-full bg-surface border border-theme rounded-lg px-3 py-1.5 text-xs text-t1 placeholder:text-t4 focus:outline-none focus:ring-1 focus:ring-teal/30 focus:border-teal transition-all"
               />
             </div>
           </div>
@@ -191,17 +201,17 @@ export default function AddItemModal({ isOpen, onClose }) {
               onClick={onClose}
               className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-t2 hover:text-t1 bg-surface hover:bg-hover border border-theme transition-colors"
             >
-              {isAmharic ? 'ተው' : 'Cancel'}
+              {isAmharic ? 'ይቅር' : 'Cancel'}
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all active:scale-95 shadow-sm"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all active:scale-95 shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
             >
-              {isAmharic ? 'መዝግብ' : 'Save Item'}
+              {isAmharic ? 'ዕቃውን መዝግብ' : 'Save Item'}
             </button>
           </div>
         </form>
-
       </div>
     </div>
   );

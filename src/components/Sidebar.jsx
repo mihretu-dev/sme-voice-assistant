@@ -6,8 +6,8 @@ import { useBusiness } from '../context/BusinessContext';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, id: 'dashboard', title: 'Dashboard', titleAm: 'ዳሽቦርድ' },
-  { icon: CalendarDays,   id: 'calendar',  title: 'Reports',   titleAm: 'ሪፖርት' },
-  { icon: Mic,            id: 'voice',     title: 'Voice',     titleAm: 'ድምፅ' },
+  { icon: CalendarDays,   id: 'calendar',  title: 'Reports & Calendar', titleAm: 'የቀን መቁጠሪያና ሪፖርቶች' },
+  { icon: Mic,            id: 'voice',     title: 'Voice Console', titleAm: 'የድምፅ መመዝገቢያ' },
 ];
 
 export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
@@ -42,7 +42,11 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
               ? { background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }
               : undefined
           }
-          title={isListening ? 'Stop voice recording (K)' : 'Start voice recording (K)'}
+          title={
+            isListening
+              ? isAmharic ? 'የድምፅ ቀረጻ አቁም (K)' : 'Stop voice recording (K)'
+              : isAmharic ? 'የቀጥታ ድምፅ ቅረጽ (K)' : 'Start voice recording (K)'
+          }
           aria-label={isListening ? 'Stop voice recording' : 'Start voice recording'}
         >
           {isListening ? (
@@ -81,7 +85,7 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           {/* Help */}
           <button
             onClick={onHelpClick}
-            title="Help & Keyboard Shortcuts (?)"
+            title={isAmharic ? 'እርዳታና አቋራጮች (?)' : 'Help & Keyboard Shortcuts (?)'}
             className="sidebar-nav-item"
             aria-label="Help"
           >
@@ -91,7 +95,11 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={
+              isDark
+                ? isAmharic ? 'ወደ ብርሃን ሁናቴ ቀይር' : 'Switch to Light Mode'
+                : isAmharic ? 'ወደ ጨለማ ሁናቴ ቀይር' : 'Switch to Dark Mode'
+            }
             className="sidebar-nav-item"
             aria-label="Toggle theme"
           >
@@ -104,20 +112,20 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
         </div>
       </nav>
 
-      {/* ── Mobile Bottom Navigation Bar (Visible only on Mobile) ── */}
+      {/* ── Mobile Bottom Navigation Bar (Mathematically Centered 5-Column Grid) ── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-sidebar/95 backdrop-blur-lg border-t border-sidebar z-50 flex items-center justify-around px-2 pb-safe shadow-2xl transition-colors duration-300"
+        className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-sidebar/95 backdrop-blur-lg border-t border-sidebar z-50 grid grid-cols-5 items-center justify-items-center px-1 pb-safe shadow-2xl transition-colors duration-300"
         aria-label="Mobile Bottom Navigation"
       >
-        {/* Dashboard Tab */}
+        {/* Column 1: Dashboard Tab */}
         <button
           onClick={() => setActivePage('dashboard')}
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 py-1 w-full transition-all ${
             activePage === 'dashboard'
               ? 'text-teal font-semibold'
               : 'text-t3 hover:text-t1'
           }`}
-          aria-label="Dashboard"
+          aria-label={isAmharic ? 'ዳሽቦርድ' : 'Dashboard'}
         >
           <LayoutDashboard className="w-5 h-5" />
           <span className="text-[10px] font-medium leading-none">
@@ -125,15 +133,15 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           </span>
         </button>
 
-        {/* Reports / Calendar Tab */}
+        {/* Column 2: Reports / Calendar Tab */}
         <button
           onClick={() => setActivePage('calendar')}
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 py-1 w-full transition-all ${
             activePage === 'calendar'
               ? 'text-teal font-semibold'
               : 'text-t3 hover:text-t1'
           }`}
-          aria-label="Reports & Calendar"
+          aria-label={isAmharic ? 'ሪፖርት' : 'Reports'}
         >
           <CalendarDays className="w-5 h-5" />
           <span className="text-[10px] font-medium leading-none">
@@ -141,13 +149,13 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           </span>
         </button>
 
-        {/* ── Center Elevated Mic Action Button ── */}
-        <div className="relative -top-3">
+        {/* Column 3: EXACT Dead-Center Elevated Mic Button */}
+        <div className="flex items-center justify-center w-full relative -top-3.5">
           <button
             id="mobile-center-mic-button"
             type="button"
             onClick={toggleVoice}
-            className={`w-13 h-13 rounded-full flex items-center justify-center shadow-xl ring-4 ring-page transition-all duration-200 active:scale-90 ${
+            className={`w-13 h-13 rounded-full flex items-center justify-center shadow-2xl ring-4 ring-page transition-all duration-200 active:scale-90 ${
               isListening
                 ? 'bg-red-600 text-white scale-105 animate-pulse ring-red-400/40'
                 : isProcessing
@@ -161,7 +169,11 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
                 ? { background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }
                 : undefined
             }
-            title={isListening ? 'Stop recording' : 'Start voice recording'}
+            title={
+              isListening
+                ? isAmharic ? 'ቀረጻ አቁም' : 'Stop recording'
+                : isAmharic ? 'ድምፅ ቅረጽ' : 'Start voice recording'
+            }
             aria-label="Voice input"
           >
             {isListening ? (
@@ -180,15 +192,15 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           </button>
         </div>
 
-        {/* Voice Console Page */}
+        {/* Column 4: Voice Console Page */}
         <button
           onClick={() => setActivePage('voice')}
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 py-1 w-full transition-all ${
             activePage === 'voice'
               ? 'text-teal font-semibold'
               : 'text-t3 hover:text-t1'
           }`}
-          aria-label="Voice Console"
+          aria-label={isAmharic ? 'ድምፅ' : 'Voice'}
         >
           <Mic className="w-5 h-5" />
           <span className="text-[10px] font-medium leading-none">
@@ -196,11 +208,11 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           </span>
         </button>
 
-        {/* Theme Toggle / Help */}
+        {/* Column 5: Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 rounded-xl text-t3 hover:text-t1 transition-all"
-          aria-label="Toggle Theme"
+          className="flex flex-col items-center justify-center gap-1 py-1 w-full text-t3 hover:text-t1 transition-all"
+          aria-label={isAmharic ? 'ገጽታ ቀይር' : 'Toggle Theme'}
         >
           {isDark ? (
             <Sun className="w-5 h-5 text-amber-400" />

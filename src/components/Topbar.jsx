@@ -3,20 +3,28 @@ import { Bell, Database, RefreshCw, AudioWaveform, X, CheckCircle2, AlertTriangl
 import { useBusiness } from '../context/BusinessContext';
 
 // Mini notification log panel shown when bell is clicked
-function NotificationPanel({ items, onClose }) {
+function NotificationPanel({ items, onClose, isAmharic }) {
   return (
     <div className="absolute top-full right-0 mt-2 w-[calc(100vw-32px)] max-w-xs sm:w-80 bg-panel border border-theme rounded-2xl shadow-2xl z-50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-theme bg-panel-hdr">
-        <span className="text-xs font-semibold text-t1">Notifications</span>
-        <button onClick={onClose} className="text-t4 hover:text-t2 transition-colors p-1" aria-label="Close">
+        <span className="text-xs font-semibold text-t1">
+          {isAmharic ? 'ማሳወቂያዎች' : 'Notifications'}
+        </span>
+        <button
+          onClick={onClose}
+          className="text-t4 hover:text-t2 transition-colors p-1"
+          aria-label={isAmharic ? 'ዝጋ' : 'Close'}
+        >
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
       <div className="max-h-72 overflow-y-auto divide-y divide-[var(--c-border-muted)]">
         {items.length === 0 ? (
-          <div className="py-8 text-center text-xs text-t4">No notifications yet</div>
+          <div className="py-8 text-center text-xs text-t4">
+            {isAmharic ? 'ምንም አዲስ ማሳወቂያ የለም' : 'No notifications yet'}
+          </div>
         ) : (
           items.slice(0, 10).map((n) => {
             const icons = {
@@ -56,6 +64,18 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
     }
   };
 
+  // Localized page title mapping
+  const localizedPageTitle =
+    isAmharic
+      ? pageTitle === 'Dashboard'
+        ? 'ዳሽቦርድ'
+        : pageTitle === 'Voice Logger'
+        ? 'የድምፅ መመዝገቢያ'
+        : pageTitle === 'Reports & Calendar' || pageTitle === 'Reports'
+        ? 'የቀን መቁጠሪያና ሪፖርቶች'
+        : pageTitle
+      : pageTitle;
+
   return (
     <header className="h-14 flex items-center justify-between px-3 sm:px-6 border-b border-theme bg-panel-blur sticky top-0 z-30 transition-colors duration-300">
       {/* Left: brand logo + breadcrumb */}
@@ -70,8 +90,8 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
         {pageTitle && (
           <div className="flex items-center gap-1 min-w-0">
             <span className="text-t4 text-xs select-none">/</span>
-            <span className="text-[11px] sm:text-xs font-medium text-t2 truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">
-              {pageTitle}
+            <span className="text-[11px] sm:text-xs font-medium text-t2 truncate max-w-[85px] xs:max-w-[130px] sm:max-w-none">
+              {localizedPageTitle}
             </span>
           </div>
         )}
@@ -128,8 +148,8 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
                 : 'bg-raised border-theme text-t3 hover:text-t1 hover:bg-hover'
             }`}
             style={bellOpen ? { color: 'var(--c-teal)' } : {}}
-            title="Notification History"
-            aria-label="Notifications"
+            title={isAmharic ? 'የማሳወቂያ ታሪክ' : 'Notification History'}
+            aria-label={isAmharic ? 'ማሳወቂያዎች' : 'Notifications'}
             aria-expanded={bellOpen}
           >
             <Bell className="w-4 h-4" />
@@ -144,7 +164,11 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
           </button>
 
           {bellOpen && (
-            <NotificationPanel items={notificationLog} onClose={onBellClose} />
+            <NotificationPanel
+              items={notificationLog}
+              onClose={onBellClose}
+              isAmharic={isAmharic}
+            />
           )}
         </div>
       </div>

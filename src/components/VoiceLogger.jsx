@@ -215,14 +215,17 @@ export default function VoiceLogger({ compact = false }) {
               <div className="p-3 rounded-lg bg-amber-950/30 border border-amber-800/40 flex items-start gap-2.5">
                 <span className="text-amber-400 font-bold text-xs shrink-0 mt-0.5">⚡</span>
                 <p className="text-xs text-amber-200/90 leading-relaxed">
-                  <strong className="font-semibold text-amber-300">Judge Testing Note:</strong> Click the mic
-                  above for live voice with streaming text preview, or click any preset chip below to test
-                  instant parsing.
+                  <strong className="font-semibold text-amber-300">
+                    {isAmharic ? 'የዳኞች የሙከራ ማስታወሻ፡' : 'Judge Testing Note:'}
+                  </strong>{' '}
+                  {isAmharic
+                    ? 'የቀጥታ ድምፅ ለመሞከር ከላይ ያለውን ማይክሮፎን ይጫኑ፣ ወይም የቀጥታ ኮታ ሳያልቁ ፈጣን ፍተሻ ለማድረግ ከታች ካሉት የናሙና አዝራሮች አንዱን ይጫኑ።'
+                    : 'Click the mic above for live voice with streaming text preview, or click any preset chip below to test instant parsing.'}
                 </p>
               </div>
 
               {/* Preset chips */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2">
                 {VOXIDE_PRESETS.map((preset) => {
                   const isSale = preset.payload.action === 'sale';
                   const isExpense = preset.payload.action === 'expense';
@@ -250,7 +253,11 @@ export default function VoiceLogger({ compact = false }) {
                               : 'text-sky-400 bg-sky-950/40 border-sky-800/50'
                           }`}
                         >
-                          {preset.payload.action}
+                          {isSale
+                            ? isAmharic ? 'ሽያጭ' : 'SALE'
+                            : isExpense
+                            ? isAmharic ? 'ወጪ' : 'EXPENSE'
+                            : isAmharic ? 'ጭማሪ' : 'STOCK'}
                         </span>
                         {isActive && <span className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse" />}
                       </div>
@@ -298,7 +305,11 @@ export default function VoiceLogger({ compact = false }) {
                   className="flex items-center gap-1.5 text-t3 hover:text-t1 transition-colors"
                 >
                   <Code className="w-3.5 h-3.5" />
-                  <span>{showJsonEditor ? 'Hide JSON Payload' : 'Inspect JSON Payload'}</span>
+                  <span>
+                    {isAmharic
+                      ? showJsonEditor ? 'የ JSON መረጃ ደብቅ' : 'የ JSON መረጃ መርምር'
+                      : showJsonEditor ? 'Hide JSON Payload' : 'Inspect JSON Payload'}
+                  </span>
                   {showJsonEditor ? (
                     <ChevronUp className="w-3.5 h-3.5" />
                   ) : (
@@ -307,7 +318,7 @@ export default function VoiceLogger({ compact = false }) {
                 </button>
                 {lastVoiceEvent && (
                   <span className="text-[11px] text-t3 font-mono">
-                    Last:{' '}
+                    {isAmharic ? 'የመጨረሻ፡ ' : 'Last: '}
                     <span className="text-t1 font-semibold">
                       {lastVoiceEvent.payload.action.toUpperCase()}
                     </span>{' '}
@@ -319,14 +330,16 @@ export default function VoiceLogger({ compact = false }) {
               {showJsonEditor && (
                 <div className="p-3.5 rounded-lg bg-surface border border-theme text-xs font-mono">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-t3 text-[11px]">Structured Payload Editor:</span>
+                    <span className="text-t3 text-[11px]">
+                      {isAmharic ? 'የተዋቀረ የግብይት አርታዒ፡' : 'Structured Payload Editor:'}
+                    </span>
                     <button
                       type="button"
                       onClick={handleJsonSubmit}
                       className="px-2.5 py-1 rounded bg-teal text-white text-[11px] font-semibold active:scale-95"
                       style={{ backgroundColor: 'var(--c-teal)' }}
                     >
-                      Post Payload
+                      {isAmharic ? 'መረጃውን መዝግብ' : 'Post Payload'}
                     </button>
                   </div>
                   <textarea
