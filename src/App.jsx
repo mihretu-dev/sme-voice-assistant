@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BusinessProvider, useBusiness } from './context/BusinessContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { VoiceProvider, useVoice } from './context/VoiceContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import SummaryCards from './components/SummaryCards';
 import VoiceLogger from './components/VoiceLogger';
 import InventoryTable from './components/InventoryTable';
 import TransactionHistory from './components/TransactionHistory';
+import CalendarReports from './components/CalendarReports';
 import AddItemModal from './components/AddItemModal';
 import NotificationToast from './components/NotificationToast';
 import OnboardingModal from './components/OnboardingModal';
@@ -27,7 +29,10 @@ function HelpModal({ onClose }) {
         </button>
 
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-teal-muted flex items-center justify-center" style={{ backgroundColor: 'var(--c-teal-muted)' }}>
+          <div
+            className="w-10 h-10 rounded-xl bg-teal-muted flex items-center justify-center"
+            style={{ backgroundColor: 'var(--c-teal-muted)' }}
+          >
             <Keyboard className="w-5 h-5" style={{ color: 'var(--c-teal)' }} />
           </div>
           <div>
@@ -39,13 +44,16 @@ function HelpModal({ onClose }) {
         {/* Keyboard shortcuts table */}
         <div className="space-y-1.5 mb-5">
           {[
-            { key: 'K',   desc: 'Activate / Stop voice mic' },
-            { key: 'N',   desc: 'Open "Add New Item" modal' },
-            { key: 'D',   desc: 'Go to Dashboard' },
-            { key: 'V',   desc: 'Go to Voice Logger' },
-            { key: '?',   desc: 'Open this Help panel' },
+            { key: 'K', desc: 'Activate / Stop voice mic' },
+            { key: 'N', desc: 'Open "Add New Item" modal' },
+            { key: 'D', desc: 'Go to Dashboard' },
+            { key: 'V', desc: 'Go to Voice Logger' },
+            { key: '?', desc: 'Open this Help panel' },
           ].map(({ key, desc }) => (
-            <div key={key} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-raised border border-theme">
+            <div
+              key={key}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg bg-raised border border-theme"
+            >
               <kbd className="min-w-[28px] text-center px-2 py-1 rounded-md bg-surface border border-theme text-[11px] font-mono font-bold text-t1">
                 {key}
               </kbd>
@@ -55,9 +63,18 @@ function HelpModal({ onClose }) {
         </div>
 
         {/* Quick tip */}
-        <div className="p-3 rounded-xl bg-teal-muted border border-teal/20 text-[11px] text-t2 leading-relaxed" style={{ backgroundColor: 'var(--c-teal-muted)', borderColor: 'color-mix(in srgb, var(--c-teal) 20%, transparent)' }}>
-          <strong className="text-t1">Tip:</strong> Click the mic orb or press <kbd className="px-1.5 py-0.5 bg-panel border border-theme rounded text-[10px] font-mono">K</kbd> to start live voice logging.
-          Use preset chips in "Testing Tools" for demo without using live credits.
+        <div
+          className="p-3 rounded-xl bg-teal-muted border border-teal/20 text-[11px] text-t2 leading-relaxed"
+          style={{
+            backgroundColor: 'var(--c-teal-muted)',
+            borderColor: 'color-mix(in srgb, var(--c-teal) 20%, transparent)',
+          }}
+        >
+          <strong className="text-t1">Tip:</strong> Click the mic orb, click the taskbar mic button, or press{' '}
+          <kbd className="px-1.5 py-0.5 bg-panel border border-theme rounded text-[10px] font-mono">
+            K
+          </kbd>{' '}
+          to start live voice logging. A real-time preview of your spoken words will appear instantly on screen!
         </div>
 
         {/* Links */}
@@ -83,23 +100,24 @@ function HelpModal({ onClose }) {
 
 // ── Page config ───────────────────────────────────────────────────────────────
 const PAGE_CONFIG = {
-  voice:    { title: 'Voice Logger', desc: 'Live voice ingestion & simulation' },
-  dashboard:{ title: 'Dashboard',   desc: 'Sales, stock & cash summary' },
-  calendar: { title: 'Reports',     desc: 'Date-range summaries & exports' },
+  voice: { title: 'Voice Logger', desc: 'Live voice ingestion, real-time preview & simulation' },
+  dashboard: { title: 'Dashboard', desc: 'Sales, stock & cash summary' },
+  calendar: { title: 'Reports & Calendar', desc: 'Date-range summaries, Ethiopian calendar view & CSV export' },
 };
 
 // ── Dashboard inner ───────────────────────────────────────────────────────────
 function DashboardContent() {
-  const { notification } = useBusiness();
+  const { notification, language } = useBusiness();
+  const { toggleVoice, isListening, isProcessing, liveTranscript } = useVoice();
 
-  const [activePage, setActivePage]         = useState('dashboard');
+  const [activePage, setActivePage] = useState('dashboard');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filterLowStockOnly, setFilterLowStockOnly] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('birrvoice-onboarded')
   );
-  const [showHelp, setShowHelp]             = useState(false);
-  const [bellOpen, setBellOpen]             = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
   const [notificationLog, setNotificationLog] = useState([]);
 
   // Collect every notification into the log for the bell panel
@@ -107,7 +125,7 @@ function DashboardContent() {
   useEffect(() => {
     if (notification && notification.id !== prevNotifId.current) {
       prevNotifId.current = notification.id;
-      setNotificationLog(prev => [notification, ...prev].slice(0, 50));
+      setNotificationLog((prev) => [notification, ...prev].slice(0, 50));
     }
   }, [notification]);
 
@@ -136,23 +154,35 @@ function DashboardContent() {
     const handler = (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
       switch (e.key.toLowerCase()) {
-        case 'k': document.getElementById('voxide-mic-button')?.click(); break;
-        case 'n': setIsAddModalOpen(true); break;
-        case 'd': setActivePage('dashboard'); break;
-        case 'v': setActivePage('voice'); break;
-        case '?': setShowHelp(true); break;
-        default: break;
+        case 'k':
+          e.preventDefault();
+          toggleVoice();
+          break;
+        case 'n':
+          setIsAddModalOpen(true);
+          break;
+        case 'd':
+          setActivePage('dashboard');
+          break;
+        case 'v':
+          setActivePage('voice');
+          break;
+        case '?':
+          setShowHelp(true);
+          break;
+        default:
+          break;
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [toggleVoice]);
 
   const page = PAGE_CONFIG[activePage] ?? PAGE_CONFIG.dashboard;
 
   return (
     <div className="min-h-screen bg-page flex antialiased transition-colors duration-300">
-      {/* Sidebar */}
+      {/* Sidebar with Taskbar Mic */}
       <Sidebar
         activePage={activePage}
         setActivePage={setActivePage}
@@ -166,7 +196,7 @@ function DashboardContent() {
           <Topbar
             pageTitle={page.title}
             notificationLog={notificationLog}
-            onBellClick={() => setBellOpen(o => !o)}
+            onBellClick={() => setBellOpen((o) => !o)}
             bellOpen={bellOpen}
             onBellClose={() => setBellOpen(false)}
           />
@@ -182,7 +212,13 @@ function DashboardContent() {
             <button
               onClick={() => setActivePage('dashboard')}
               className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 shadow-sm"
-              style={{ background: activePage === 'dashboard' ? 'linear-gradient(135deg, #14b8a6, #0d9488)' : 'var(--c-raised)', color: activePage === 'dashboard' ? 'white' : 'var(--c-text-2)' }}
+              style={{
+                background:
+                  activePage === 'dashboard'
+                    ? 'linear-gradient(135deg, #14b8a6, #0d9488)'
+                    : 'var(--c-raised)',
+                color: activePage === 'dashboard' ? 'white' : 'var(--c-text-2)',
+              }}
             >
               <span className="text-base leading-none">⊞</span>
               Dashboard
@@ -191,9 +227,17 @@ function DashboardContent() {
 
           {/* Keyboard hint strip */}
           <div className="hidden lg:flex items-center gap-4 text-[11px] text-t4 font-mono">
-            {[['K','Voice'],['N','New Item'],['D','Dashboard'],['V','Voice Page'],['?','Help']].map(([k, label]) => (
+            {[
+              ['K', 'Voice'],
+              ['N', 'New Item'],
+              ['D', 'Dashboard'],
+              ['V', 'Voice Page'],
+              ['?', 'Help'],
+            ].map(([k, label]) => (
               <span key={k}>
-                <kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">{k}</kbd>{' '}
+                <kbd className="px-1.5 py-0.5 bg-raised border border-theme rounded text-[10px]">
+                  {k}
+                </kbd>{' '}
                 {label}
               </span>
             ))}
@@ -228,22 +272,49 @@ function DashboardContent() {
             </>
           )}
 
-          {/* Calendar/Reports placeholder */}
+          {/* Calendar & Reports page */}
           {activePage === 'calendar' && (
-            <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-raised border border-theme flex items-center justify-center text-2xl">📅</div>
-              <p className="text-sm font-medium text-t2">Calendar & Reports</p>
-              <p className="text-xs text-t4 max-w-xs">Date-range summaries, Ethiopian calendar view, and full CSV exports coming soon.</p>
-              <button
-                onClick={() => setActivePage('dashboard')}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
-                style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
-              >
-                Back to Dashboard
-              </button>
-            </div>
+            <section aria-label="Calendar and Reports">
+              <CalendarReports />
+            </section>
           )}
         </main>
+
+        {/* Global Floating Live Voice HUD Bar (visible when recording outside voice console) */}
+        {(isListening || isProcessing) && activePage !== 'voice' && (
+          <aside
+            aria-label="Live Voice Floating Status"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-panel border-2 border-teal shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 max-w-[90vw]"
+          >
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span className="text-xs font-bold text-red-500 uppercase tracking-wider">
+                {language === 'am' ? 'እያዳመጠ ነው' : 'Recording'}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-theme shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-medium text-t1 max-w-xs sm:max-w-sm md:max-w-md truncate">
+              {liveTranscript ? (
+                <span className="text-teal font-semibold">“{liveTranscript}”</span>
+              ) : (
+                <span className="text-t3 italic">
+                  {language === 'am' ? 'ድምፅዎን ይናገሩ...' : 'Speak your transaction now...'}
+                </span>
+              )}
+            </div>
+            <div className="flex items-end gap-1 h-3.5 px-1 shrink-0">
+              <span className="w-1 bg-teal rounded-full animate-audio-bar-1" />
+              <span className="w-1 bg-teal rounded-full animate-audio-bar-2" />
+              <span className="w-1 bg-teal rounded-full animate-audio-bar-3" />
+            </div>
+            <button
+              onClick={toggleVoice}
+              className="ml-2 px-3 py-1 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all active:scale-95 shrink-0"
+            >
+              {language === 'am' ? 'አቁም' : 'Stop'}
+            </button>
+          </aside>
+        )}
 
         {/* Footer */}
         <footer className="border-t border-theme bg-panel py-3 px-6 text-[11px] text-t4">
@@ -282,7 +353,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <BusinessProvider>
-        <DashboardContent />
+        <VoiceProvider>
+          <DashboardContent />
+        </VoiceProvider>
       </BusinessProvider>
     </ThemeProvider>
   );
