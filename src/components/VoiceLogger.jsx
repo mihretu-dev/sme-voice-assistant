@@ -74,7 +74,7 @@ export default function VoiceLogger({ compact = false }) {
       : 'Say a sale, expense or restock';
 
   // Orb class composition
-  const orbBase = 'flex items-center justify-center w-20 h-20 rounded-full transition-all duration-200 active:scale-95 cursor-pointer';
+  const orbBase = 'flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full transition-all duration-200 active:scale-95 cursor-pointer';
   const orbStyle =
     effectiveState === 'listening'
       ? `${orbBase} bg-red-600 text-white scale-105 animate-listening-glow`
@@ -100,7 +100,7 @@ export default function VoiceLogger({ compact = false }) {
       />
       <div
         className={`rounded-2xl bg-panel border border-theme relative overflow-hidden transition-colors duration-300 ${
-          compact ? 'p-4 sm:p-5' : 'p-6 sm:p-8'
+          compact ? 'p-3.5 sm:p-5' : 'p-5 sm:p-8'
         }`}
       >
         {/* Indigo ambient glow behind orb */}
@@ -109,7 +109,7 @@ export default function VoiceLogger({ compact = false }) {
         {/* Centred voice panel */}
         <div className="relative flex flex-col items-center justify-center text-center">
           {/* Visualizer bars */}
-          <div className="flex items-end gap-[3px] h-7 mb-4">
+          <div className="flex items-end gap-[3px] h-6 sm:h-7 mb-3 sm:mb-4">
             {BAR_HEIGHTS.map((h, i) => (
               <span
                 key={i}
@@ -135,17 +135,17 @@ export default function VoiceLogger({ compact = false }) {
           >
             {effectiveState === 'listening' ? (
               /* Live audio bars inside orb */
-              <div className="flex items-end gap-[3px] h-7">
+              <div className="flex items-end gap-[3px] h-6 sm:h-7">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <span key={n} className={`w-1 rounded-full bg-white animate-audio-bar-${n}`} />
                 ))}
               </div>
             ) : effectiveState === 'processing' ? (
-              <Loader2 className="w-8 h-8 animate-spin" />
+              <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin" />
             ) : effectiveState === 'success' ? (
-              <CheckCircle2 className="w-8 h-8" />
+              <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8" />
             ) : (
-              <Mic className="w-8 h-8" />
+              <Mic className="w-6 h-6 sm:w-8 sm:h-8" />
             )}
           </button>
 

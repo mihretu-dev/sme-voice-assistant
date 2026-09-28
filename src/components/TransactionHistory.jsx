@@ -42,7 +42,7 @@ export default function TransactionHistory() {
     }`;
 
   return (
-    <div className="rounded-2xl bg-panel border border-theme p-5 flex flex-col h-full transition-colors duration-300">
+    <div className="rounded-2xl bg-panel border border-theme p-3.5 sm:p-5 flex flex-col h-full transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-2">

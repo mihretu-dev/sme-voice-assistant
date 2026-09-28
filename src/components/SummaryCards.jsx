@@ -116,32 +116,32 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
   ];
 
   return (
-    <section aria-label="Business Metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <section aria-label="Business Metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.id}
             className={[
-              'rounded-2xl bg-panel border border-theme p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg',
+              'rounded-2xl bg-panel border border-theme p-3.5 sm:p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg',
               card.deficitBg ? 'border-amber-800/30' : '',
             ].join(' ')}
           >
             {/* Header row */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
               <span className="text-xs font-medium text-t3">{card.title}</span>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}>
-                <Icon className={`w-4 h-4 ${card.iconColor}`} />
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}>
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${card.iconColor}`} />
               </div>
             </div>
 
             {/* Amount */}
             <div className="flex items-baseline gap-1.5">
-              {card.prefix && <span className="text-2xl font-bold text-t2">{card.prefix}</span>}
-              <span className="text-3xl font-bold tracking-tight text-t1 tabular-nums">
+              {card.prefix && <span className="text-xl sm:text-2xl font-bold text-t2">{card.prefix}</span>}
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-t1 tabular-nums">
                 {card.display.val}
               </span>
-              <span className="text-sm font-semibold text-t3">{card.display.unit}</span>
+              <span className="text-xs sm:text-sm font-semibold text-t3">{card.display.unit}</span>
             </div>
 
             {/* Sparkline */}
@@ -154,8 +154,8 @@ export default function SummaryCards({ onSelectLowStockFilter }) {
             )}
 
             {/* Footer */}
-            <div className="mt-3 flex items-center justify-between text-[11px] pt-2.5 border-t border-theme-muted">
-              <span className="text-t4 truncate">{card.sub}</span>
+            <div className="mt-2.5 sm:mt-3 flex items-center justify-between text-[11px] pt-2 sm:pt-2.5 border-t border-theme-muted">
+              <span className="text-t4 truncate text-[10px] sm:text-[11px]">{card.sub}</span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${card.badgeClass}`}>
                 {card.badge}
               </span>

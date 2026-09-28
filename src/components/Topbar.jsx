@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Bell, Database, RefreshCw, AudioWaveform, X, CheckCircle2, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 
 // Mini notification log panel shown when bell is clicked
 function NotificationPanel({ items, onClose }) {
   return (
-    <div className="absolute top-full right-0 mt-2 w-80 bg-panel border border-theme rounded-2xl shadow-2xl z-50 overflow-hidden">
+    <div className="absolute top-full right-0 mt-2 w-[calc(100vw-32px)] max-w-xs sm:w-80 bg-panel border border-theme rounded-2xl shadow-2xl z-50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-theme bg-panel-hdr">
         <span className="text-xs font-semibold text-t1">Notifications</span>
-        <button onClick={onClose} className="text-t4 hover:text-t2 transition-colors" aria-label="Close">
+        <button onClick={onClose} className="text-t4 hover:text-t2 transition-colors p-1" aria-label="Close">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -26,10 +26,10 @@ function NotificationPanel({ items, onClose }) {
               info:    <Info          className="w-3.5 h-3.5 text-teal" style={{ color: 'var(--c-teal)' }} />,
             };
             return (
-              <div key={n.id} className="flex items-start gap-3 px-4 py-3 hover:bg-raised transition-colors">
+              <div key={n.id} className="flex items-start gap-2.5 px-3.5 py-2.5 hover:bg-raised transition-colors">
                 <div className="mt-0.5 shrink-0">{icons[n.type] ?? icons.info}</div>
-                <div>
-                  <p className="text-xs text-t1 leading-relaxed">{n.message}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-t1 leading-relaxed break-words">{n.message}</p>
                   <p className="text-[10px] text-t4 mt-0.5 font-mono">
                     {new Date(n.id).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -46,8 +46,6 @@ function NotificationPanel({ items, onClose }) {
 export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOpen, onBellClose }) {
   const { language, setLanguage, resetToDemo, clearDemoData, hasData } = useBusiness();
   const isAmharic = language === 'am';
-
-  // Track whether demo data is currently loaded
   const isDemoActive = hasData;
 
   const handleDemoReset = () => {
@@ -59,69 +57,68 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
   };
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 border-b border-theme bg-panel-blur sticky top-0 z-30 transition-colors duration-300">
-      {/* Left: brand + breadcrumb */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <AudioWaveform className="w-5 h-5 text-teal" style={{ color: 'var(--c-teal)' }} />
-          <span className="text-sm font-bold text-t1">BirrVoice Ledger</span>
+    <header className="h-14 flex items-center justify-between px-3 sm:px-6 border-b border-theme bg-panel-blur sticky top-0 z-30 transition-colors duration-300">
+      {/* Left: brand logo + breadcrumb */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <AudioWaveform className="w-5 h-5 text-teal shrink-0" style={{ color: 'var(--c-teal)' }} />
+          <span className="text-xs sm:text-sm font-bold text-t1 tracking-tight">
+            BirrVoice
+            <span className="hidden xs:inline"> Ledger</span>
+          </span>
         </div>
         {pageTitle && (
-          <>
-            <span className="text-t4 text-sm">/</span>
-            <span className="text-sm font-medium text-t2">{pageTitle}</span>
-          </>
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-t4 text-xs select-none">/</span>
+            <span className="text-[11px] sm:text-xs font-medium text-t2 truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">
+              {pageTitle}
+            </span>
+          </div>
         )}
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-2">
-        {/* Language toggle */}
-        <div className="hidden sm:flex items-center bg-surface p-0.5 rounded-lg border border-theme">
-          <button
-            onClick={() => setLanguage('en')}
-            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-              language === 'en'
-                ? 'bg-teal-muted text-teal border border-teal/30'
-                : 'text-t3 hover:text-t1'
-            }`}
-            style={language === 'en' ? { color: 'var(--c-teal)' } : {}}
-          >
-            <span>🇬🇧</span><span>EN</span>
-          </button>
-          <button
-            onClick={() => setLanguage('am')}
-            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-              language === 'am'
-                ? 'bg-teal-muted text-teal border border-teal/30'
-                : 'text-t3 hover:text-t1'
-            }`}
-            style={language === 'am' ? { color: 'var(--c-teal)' } : {}}
-          >
-            <span>🇪🇹</span><span>አማርኛ</span>
-          </button>
-        </div>
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Language toggle: available on both mobile and desktop */}
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'am' : 'en')}
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-surface hover:bg-raised border border-theme text-t1 transition-all active:scale-95"
+          title={isAmharic ? 'ወደ እንግሊዝኛ ቀይር (Switch to English)' : 'Switch to Amharic (ወደ አማርኛ)'}
+          aria-label="Toggle Language"
+        >
+          <span>{language === 'en' ? '🇬🇧' : '🇪🇹'}</span>
+          <span className="text-[11px] font-mono">{language === 'en' ? 'EN' : 'አማ'}</span>
+        </button>
 
         {/* Demo / Reset toggle button */}
         <button
           onClick={handleDemoReset}
-          title={isDemoActive
-            ? (isAmharic ? 'ሁሉንም ውሂብ ሰርዝ' : 'Clear all data')
-            : (isAmharic ? 'ናሙና ውሂብ አስነሳ' : 'Load demo data')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
+          title={
+            isDemoActive
+              ? isAmharic ? 'ሁሉንም ውሂብ ሰርዝ' : 'Clear all data'
+              : isAmharic ? 'ናሙና ውሂብ አስነሳ' : 'Load demo data'
+          }
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
             isDemoActive
               ? 'bg-raised text-t2 border-theme hover:text-rose-400 hover:border-rose-500/40'
-              : 'border-teal/40 hover:bg-teal-muted'
+              : 'border-teal/40 bg-teal-muted text-teal'
           }`}
           style={!isDemoActive ? { color: 'var(--c-teal)' } : {}}
         >
-          {isDemoActive
-            ? <><RefreshCw className="w-3.5 h-3.5" /><span className="hidden sm:inline">{isAmharic ? 'ሰርዝ' : 'Reset'}</span></>
-            : <><Database  className="w-3.5 h-3.5" /><span className="hidden sm:inline">{isAmharic ? 'ናሙና' : 'Demo'}</span></>
-          }
+          {isDemoActive ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline text-[11px]">{isAmharic ? 'ሰርዝ' : 'Reset'}</span>
+            </>
+          ) : (
+            <>
+              <Database className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline text-[11px]">{isAmharic ? 'ናሙና' : 'Demo'}</span>
+            </>
+          )}
         </button>
 
-        {/* Bell — shows notification history panel on click */}
+        {/* Bell notification history button */}
         <div className="relative">
           <button
             onClick={onBellClick}

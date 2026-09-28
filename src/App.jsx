@@ -190,7 +190,7 @@ function DashboardContent() {
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 ml-16">
+      <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-16 pb-20 md:pb-0">
         {/* Topbar */}
         <div ref={bellRef}>
           <Topbar
@@ -202,7 +202,7 @@ function DashboardContent() {
           />
         </div>
 
-        <main className="flex-1 p-5 md:p-6 space-y-5 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
           {/* Page heading */}
           <div className="flex items-center justify-between">
             <div>
@@ -284,7 +284,7 @@ function DashboardContent() {
         {(isListening || isProcessing) && activePage !== 'voice' && (
           <aside
             aria-label="Live Voice Floating Status"
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-panel border-2 border-teal shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 max-w-[90vw]"
+            className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-panel border-2 border-teal shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 max-w-[94vw]"
           >
             <div className="flex items-center gap-2 shrink-0">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />

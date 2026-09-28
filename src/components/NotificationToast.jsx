@@ -85,7 +85,7 @@ export default function NotificationToast() {
   return (
     <div
       className={`
-        fixed bottom-6 left-6 z-[100] max-w-[340px] w-full
+        fixed bottom-20 sm:bottom-6 left-3 sm:left-6 z-[100] max-w-[calc(100vw-24px)] sm:max-w-[340px] w-full
         transition-all duration-300 ease-out
         ${leaving
           ? 'opacity-0 translate-y-2 scale-95 pointer-events-none'

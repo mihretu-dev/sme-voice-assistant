@@ -274,8 +274,8 @@ export default function CalendarReports() {
   return (
     <div className="space-y-6">
       {/* ── Top Bar: Period Presets & Export ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-panel border border-theme">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-panel border border-theme">
+        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: 'today', labelEn: 'Today', labelAm: 'ዛሬ' },
             { id: 'week', labelEn: 'This Week', labelAm: 'በዚህ ሳምንት' },
@@ -288,7 +288,7 @@ export default function CalendarReports() {
                 setPeriodPreset(tab.id);
                 setSelectedDay(null);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 periodPreset === tab.id && selectedDay === null
                   ? 'bg-teal text-white shadow-sm'
                   : 'bg-raised hover:bg-surface text-t2 border border-theme'
@@ -302,7 +302,7 @@ export default function CalendarReports() {
             </button>
           ))}
           {selectedDay && (
-            <span className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-muted text-teal border border-teal/30">
+            <span className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-muted text-teal border border-teal/30 shrink-0">
               {isAmharic ? `ቀን ${selectedDay}` : `Day ${selectedDay}`}
             </span>
           )}
@@ -310,99 +310,99 @@ export default function CalendarReports() {
 
         <button
           onClick={handleExportCSV}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all active:scale-95 shadow-sm"
+          className="flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all active:scale-95 shadow-sm"
           style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>{isAmharic ? 'የሪፖርት ፋይል አውርድ (CSV)' : 'Export Period CSV'}</span>
         </button>
       </div>
 
       {/* ── Period Summary KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {/* Sales */}
-        <div className="p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-t3">
             <span>{isAmharic ? 'የተመረጠው ጊዜ ሽያጭ' : 'Period Sales'}</span>
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-              <TrendingUp className="w-4 h-4" />
+            <span className="p-1 sm:p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </span>
           </div>
-          <div className="my-2">
-            <span className="text-2xl font-bold font-mono text-t1">
+          <div className="my-1.5 sm:my-2">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-t1">
               {formatETB(periodSummary.salesTotal)}
             </span>
           </div>
-          <span className="text-[11px] text-t4">
+          <span className="text-[10px] sm:text-[11px] text-t4">
             {periodSummary.salesCount} {isAmharic ? 'ሽያጮች' : 'sales transactions'}
           </span>
         </div>
 
         {/* Expenses */}
-        <div className="p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-t3">
             <span>{isAmharic ? 'የተመረጠው ጊዜ ወጪ' : 'Period Expenses'}</span>
-            <span className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
-              <TrendingDown className="w-4 h-4" />
+            <span className="p-1 sm:p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+              <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </span>
           </div>
-          <div className="my-2">
-            <span className="text-2xl font-bold font-mono text-t1">
+          <div className="my-1.5 sm:my-2">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-t1">
               {formatETB(periodSummary.expensesTotal)}
             </span>
           </div>
-          <span className="text-[11px] text-t4">
+          <span className="text-[10px] sm:text-[11px] text-t4">
             {periodSummary.expenseCount} {isAmharic ? 'የወጪ ምዝገባዎች' : 'expense entries'}
           </span>
         </div>
 
         {/* Net Profit */}
-        <div className="p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-panel border border-theme flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-t3">
             <span>{isAmharic ? 'የተጣራ ትርፍ (Net Profit)' : 'Net Profit / Margin'}</span>
-            <span className="p-1.5 rounded-lg bg-teal-muted text-teal">
-              <DollarSign className="w-4 h-4" />
+            <span className="p-1 sm:p-1.5 rounded-lg bg-teal-muted text-teal">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </span>
           </div>
-          <div className="my-2">
+          <div className="my-1.5 sm:my-2">
             <span
-              className={`text-2xl font-bold font-mono ${
+              className={`text-xl sm:text-2xl font-bold font-mono ${
                 periodSummary.netCash >= 0 ? 'text-teal' : 'text-rose-400'
               }`}
             >
               {formatETB(periodSummary.netCash)}
             </span>
           </div>
-          <span className="text-[11px] text-t4">
+          <span className="text-[10px] sm:text-[11px] text-t4">
             {isAmharic ? 'የሽያጭ ሲቀነስ ወጪ ድምር' : 'Sales minus expenses'}
           </span>
         </div>
       </div>
 
       {/* ── Dual Ethiopian & Gregorian Calendar ── */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-panel border border-theme space-y-4">
+      <div className="p-3.5 sm:p-6 rounded-2xl bg-panel border border-theme space-y-3 sm:space-y-4">
         {/* Calendar Month Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-theme">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-3 border-b border-theme">
           <div>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-teal" />
-              <h2 className="text-base font-bold text-t1">
+              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal" />
+              <h2 className="text-sm sm:text-base font-bold text-t1">
                 {isAmharic
                   ? `${ethHeaderDate.monthNameAm} ${ethHeaderDate.year} • ${gregMonthName}`
                   : `${gregMonthName} • ${ethHeaderDate.monthName} ${ethHeaderDate.year}`}
               </h2>
             </div>
-            <p className="text-[11px] text-t4 mt-0.5">
+            <p className="text-[10px] sm:text-[11px] text-t4 mt-0.5">
               {isAmharic
-                ? 'የኢትዮጵያ (ግዕዝ) እና ፈረንጅ የቀን መቁጠሪያ — ቀንን ጠቅ በማድረግ የቀኑን ግብይት ይመልከቱ'
-                : 'Dual Ethiopian & Gregorian calendar — click any day to view daily ledger'}
+                ? 'የኢትዮጵያ (ግዕዝ) እና ፈረንጅ የቀን መቁጠሪያ'
+                : 'Dual Ethiopian & Gregorian calendar'}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             <button
               onClick={handleJumpToday}
-              className="px-3 py-1 rounded-xl text-xs font-semibold bg-raised hover:bg-surface border border-theme text-t2"
+              className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-semibold bg-raised hover:bg-surface border border-theme text-t2"
             >
               {isAmharic ? 'ዛሬ' : 'Today'}
             </button>
@@ -412,23 +412,23 @@ export default function CalendarReports() {
                 aria-label="Previous month"
                 className="p-1.5 hover:text-teal text-t3 rounded-lg transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={handleNextMonth}
                 aria-label="Next month"
                 className="p-1.5 hover:text-teal text-t3 rounded-lg transition-colors"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Days of Week Header */}
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-t4 py-1">
+        <div className="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-semibold text-t4 py-1">
           {(isAmharic ? WEEKDAYS_AM : WEEKDAYS_EN).map((w, idx) => (
-            <div key={idx} className="py-1">
+            <div key={idx} className="py-0.5">
               {w}
             </div>
           ))}
@@ -441,7 +441,7 @@ export default function CalendarReports() {
               return (
                 <div
                   key={d.key}
-                  className="h-16 sm:h-20 rounded-xl bg-surface/30 border border-transparent"
+                  className="h-12 sm:h-20 rounded-xl bg-surface/30 border border-transparent"
                 />
               );
             }
@@ -452,7 +452,7 @@ export default function CalendarReports() {
               <button
                 key={d.key}
                 onClick={() => setSelectedDay(isSelected ? null : d.day)}
-                className={`h-16 sm:h-20 p-1.5 rounded-xl border text-left flex flex-col justify-between transition-all relative ${
+                className={`h-12 sm:h-20 p-1 sm:p-1.5 rounded-xl border text-left flex flex-col justify-between transition-all relative ${
                   isSelected
                     ? 'bg-teal text-white border-teal shadow-md ring-2 ring-teal/30 scale-[1.02]'
                     : d.isToday
@@ -462,11 +462,11 @@ export default function CalendarReports() {
               >
                 {/* Gregorian & Ethiopian Day Number */}
                 <div className="flex items-start justify-between">
-                  <span className="text-xs sm:text-sm font-bold font-mono leading-none">
+                  <span className="text-[11px] sm:text-sm font-bold font-mono leading-none">
                     {d.day}
                   </span>
                   <span
-                    className={`text-[10px] font-mono opacity-60 ${
+                    className={`text-[8px] sm:text-[10px] font-mono opacity-60 ${
                       isSelected ? 'text-white' : 'text-teal'
                     }`}
                   >

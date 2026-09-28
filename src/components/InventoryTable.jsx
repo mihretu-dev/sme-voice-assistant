@@ -34,7 +34,7 @@ export default function InventoryTable({ onOpenAddModal, filterLowStockOnly, set
   });
 
   return (
-    <div className="rounded-2xl bg-panel border border-theme p-5 transition-colors duration-300">
+    <div className="rounded-2xl bg-panel border border-theme p-3.5 sm:p-5 transition-colors duration-300">
       {/* Header row */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
