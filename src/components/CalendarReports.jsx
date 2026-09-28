@@ -454,19 +454,25 @@ export default function CalendarReports() {
                 onClick={() => setSelectedDay(isSelected ? null : d.day)}
                 className={`h-12 sm:h-20 p-1 sm:p-1.5 rounded-xl border text-left flex flex-col justify-between transition-all relative ${
                   isSelected
-                    ? 'bg-teal text-white border-teal shadow-md ring-2 ring-teal/30 scale-[1.02]'
+                    ? 'border-transparent shadow-lg ring-2 scale-[1.02]'
                     : d.isToday
                     ? 'bg-teal-muted/40 border-teal text-t1'
                     : 'bg-raised hover:bg-surface border-theme text-t2'
                 }`}
+                style={isSelected ? {
+                  background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+                  color: 'white',
+                  boxShadow: '0 4px 14px rgba(20,184,166,0.35)',
+                  ringColor: 'rgba(20,184,166,0.35)',
+                } : undefined}
               >
                 {/* Gregorian & Ethiopian Day Number */}
                 <div className="flex items-start justify-between">
-                  <span className="text-[11px] sm:text-sm font-bold font-mono leading-none">
+                  <span className={`text-[11px] sm:text-sm font-bold font-mono leading-none ${isSelected ? 'text-white' : ''}`}>
                     {d.day}
                   </span>
                   <span
-                    className={`text-[8px] sm:text-[10px] font-mono opacity-60 ${
+                    className={`text-[8px] sm:text-[10px] font-mono opacity-70 ${
                       isSelected ? 'text-white' : 'text-teal'
                     }`}
                   >
@@ -479,19 +485,19 @@ export default function CalendarReports() {
                   {d.hasSales && (
                     <span
                       title="Sales recorded"
-                      className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : 'bg-emerald-400'}`}
                     />
                   )}
                   {d.hasExpenses && (
                     <span
                       title="Expenses recorded"
-                      className="w-1.5 h-1.5 rounded-full bg-rose-400"
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/60' : 'bg-rose-400'}`}
                     />
                   )}
                   {d.hasStock && (
                     <span
                       title="Stock restocked"
-                      className="w-1.5 h-1.5 rounded-full bg-cyan-400"
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/40' : 'bg-cyan-400'}`}
                     />
                   )}
                   {d.txCount > 0 && (

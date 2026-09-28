@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Database, RefreshCw, AudioWaveform, X, CheckCircle2, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import { Bell, Database, RefreshCw, X, CheckCircle2, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 import { useBusiness } from '../context/BusinessContext';
 
 // Mini notification log panel shown when bell is clicked
@@ -80,8 +80,13 @@ export default function Topbar({ pageTitle, notificationLog, onBellClick, bellOp
     <header className="h-14 flex items-center justify-between px-3 sm:px-6 border-b border-theme bg-panel-blur sticky top-0 z-30 transition-colors duration-300">
       {/* Left: brand logo + breadcrumb */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <AudioWaveform className="w-5 h-5 text-teal shrink-0" style={{ color: 'var(--c-teal)' }} />
+        <div className="flex items-center gap-2 shrink-0">
+          <img
+            src="/favicon.svg"
+            alt="BirrVoice"
+            className="w-7 h-7 shrink-0 rounded-lg"
+            aria-hidden="true"
+          />
           <span className="text-xs sm:text-sm font-bold text-t1 tracking-tight">
             BirrVoice
             <span className="hidden xs:inline"> Ledger</span>

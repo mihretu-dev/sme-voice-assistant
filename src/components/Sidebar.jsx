@@ -28,7 +28,7 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           id="sidebar-taskbar-mic-button"
           type="button"
           onClick={toggleVoice}
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-4 cursor-pointer shrink-0 transition-all duration-200 active:scale-90 shadow-md ${
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 cursor-pointer shrink-0 transition-all duration-200 active:scale-90 shadow-lg ${
             isListening
               ? 'bg-red-600 text-white scale-105 animate-pulse ring-4 ring-red-400/30'
               : isProcessing
@@ -50,17 +50,17 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
           aria-label={isListening ? 'Stop voice recording' : 'Start voice recording'}
         >
           {isListening ? (
-            <div className="flex items-end gap-[2px] h-4">
+            <div className="flex items-end gap-[2px] h-5">
               <span className="w-1 bg-white rounded-full animate-audio-bar-1" />
               <span className="w-1 bg-white rounded-full animate-audio-bar-3" />
               <span className="w-1 bg-white rounded-full animate-audio-bar-2" />
             </div>
           ) : isProcessing ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-6 h-6 animate-spin" />
           ) : effectiveState === 'success' ? (
-            <CheckCircle2 className="w-5 h-5" />
+            <CheckCircle2 className="w-6 h-6" />
           ) : (
-            <Mic className="w-5 h-5 text-white" />
+            <Mic className="w-7 h-7 text-white" />
           )}
         </button>
 
@@ -150,12 +150,12 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
         </button>
 
         {/* Column 3: EXACT Dead-Center Elevated Mic Button */}
-        <div className="flex items-center justify-center w-full relative -top-3.5">
+        <div className="flex items-center justify-center w-full relative -top-5">
           <button
             id="mobile-center-mic-button"
             type="button"
             onClick={toggleVoice}
-            className={`w-13 h-13 rounded-full flex items-center justify-center shadow-2xl ring-4 ring-page transition-all duration-200 active:scale-90 ${
+            className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl ring-4 ring-page transition-all duration-200 active:scale-90 ${
               isListening
                 ? 'bg-red-600 text-white scale-105 animate-pulse ring-red-400/40'
                 : isProcessing
@@ -166,7 +166,7 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
             }`}
             style={
               effectiveState === 'idle'
-                ? { background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }
+                ? { background: 'linear-gradient(135deg, #14b8a6, #0d9488)', boxShadow: '0 8px 25px rgba(20,184,166,0.45)' }
                 : undefined
             }
             title={
@@ -177,17 +177,17 @@ export default function Sidebar({ activePage, setActivePage, onHelpClick }) {
             aria-label="Voice input"
           >
             {isListening ? (
-              <div className="flex items-end gap-[2px] h-4">
-                <span className="w-1 bg-white rounded-full animate-audio-bar-1" />
-                <span className="w-1 bg-white rounded-full animate-audio-bar-3" />
-                <span className="w-1 bg-white rounded-full animate-audio-bar-2" />
+              <div className="flex items-end gap-[2px] h-5">
+                <span className="w-1.5 bg-white rounded-full animate-audio-bar-1" />
+                <span className="w-1.5 bg-white rounded-full animate-audio-bar-3" />
+                <span className="w-1.5 bg-white rounded-full animate-audio-bar-2" />
               </div>
             ) : isProcessing ? (
-              <Loader2 className="w-6 h-6 animate-spin text-teal" />
+              <Loader2 className="w-7 h-7 animate-spin text-teal" />
             ) : effectiveState === 'success' ? (
-              <CheckCircle2 className="w-6 h-6 text-white" />
+              <CheckCircle2 className="w-7 h-7 text-white" />
             ) : (
-              <Mic className="w-6 h-6 text-white" />
+              <Mic className="w-8 h-8 text-white" />
             )}
           </button>
         </div>

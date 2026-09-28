@@ -223,9 +223,9 @@ function DashboardContent() {
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-16 pb-20 md:pb-0">
-        {/* Topbar */}
-        <div ref={bellRef}>
+      <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-16 pb-20 md:pb-0 overflow-y-auto h-screen">
+        {/* Topbar — sticky inside this scroll container */}
+        <div ref={bellRef} className="sticky top-0 z-30">
           <Topbar
             pageTitle={page.title}
             notificationLog={notificationLog}
@@ -235,7 +235,7 @@ function DashboardContent() {
           />
         </div>
 
-        <main className="flex-1 p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-5">
           {/* Page heading */}
           <div className="flex items-center justify-between">
             <div>
