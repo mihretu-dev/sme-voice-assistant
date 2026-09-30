@@ -4,7 +4,7 @@
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Try%20It%20Now-14b8a6?style=for-the-badge&logoColor=white)](https://mihretu-dev.github.io/sme-voice-assistant/)
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Try%20It%20Now-14b8a6?style=for-the-badge&logoColor=white)](https://sme-voice-assistant.ethiodeploy.com/)
 [![STARK Hackathon 2026](https://img.shields.io/badge/STARK%20Hackathon-2026%20Project-0d9488?style=for-the-badge)](https://hackathon.stark.et/)
 [![Scholarxiv Verified](https://img.shields.io/badge/Scholarxiv-Ideation%20Paper%20Verified-blue?style=for-the-badge)](https://www.scholarxiv.com/write/6aa993bf67a18d2c6ed8ec92)
 
